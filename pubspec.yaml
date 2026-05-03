@@ -1,0 +1,70 @@
+## pubspec.yaml
+## Purpose: Flutter project manifest — declares package name, version, dependencies, and assets.
+
+name: zamwealth_quest
+description: >
+  ZamWealth Quest — a gamified financial literacy and micro-investment simulation
+  platform for the Zambian market. Fully offline, powered by Hive local storage.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ---------------------------------------------------------------------------
+  # Local Storage — Hive
+  # ---------------------------------------------------------------------------
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # ---------------------------------------------------------------------------
+  # State Management — Riverpod
+  # ---------------------------------------------------------------------------
+  flutter_riverpod: ^2.5.1
+
+  # ---------------------------------------------------------------------------
+  # Navigation — GoRouter
+  # ---------------------------------------------------------------------------
+  go_router: ^13.0.0
+
+  # ---------------------------------------------------------------------------
+  # Charts — fl_chart
+  # ---------------------------------------------------------------------------
+  fl_chart: ^0.67.0
+
+  # ---------------------------------------------------------------------------
+  # Connectivity — connectivity_plus
+  # ---------------------------------------------------------------------------
+  connectivity_plus: ^6.0.3
+
+  # ---------------------------------------------------------------------------
+  # Typography — Google Fonts (Poppins + Inter)
+  # ---------------------------------------------------------------------------
+  google_fonts: ^6.2.1
+
+  # ---------------------------------------------------------------------------
+  # Utilities
+  # ---------------------------------------------------------------------------
+  uuid: ^4.3.3               # For generating unique payment IDs
+  intl: ^0.19.0              # For ZMW number formatting
+  path_provider: ^2.1.2      # Required by hive_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Hive code generation
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.9
+
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  # Add any asset folders here if needed in future
+  # assets:
+  #   - assets/images/
