@@ -1,71 +1,115 @@
 /// theme.dart
-/// Purpose: Defines the complete ZamWealth Quest design system — colours,
-///          typography (Google Fonts), card styles, button themes, and the
-///          full MaterialTheme used by MaterialApp.router.
-/// Reads from: nothing
-/// Writes to: nothing
-/// Navigation: none
+/// Purpose: ZamWealth Quest design system — dark sci-fi financial palette,
+///          Orbitron / Rajdhani / Inter typography, card helpers, and the
+///          single MaterialTheme used by MaterialApp.router.
 library;
 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Brand Colours
+// Core 8-Colour Palette
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Primary brand colour — Copper. Used for headings, primary buttons,
-/// selected bottom-nav items, and interactive accents.
-const Color kCopper = Color(0xFFB87333);
+/// Deepest background — used by the gradient top stop.
+const Color kCoreNavy      = Color(0xFF00203F);
 
-/// Light copper tone for card borders and secondary accents.
-const Color kCopperLight = Color(0xFFD4956A);
+/// Card / surface background.
+const Color kDeepNavy      = Color(0xFF0D1B2A);
 
-/// Very light copper tint for pressed states.
-const Color kCopperSurface = Color(0xFFF5E6D8);
+/// Primary accent — neon teal. Actions, selected states, highlights.
+const Color kNeonMint      = Color(0xFF36ECDE);
 
-/// Success / progress colour — Malachite Green.
-const Color kGreen = Color(0xFF2E8B57);
+/// Secondary accent — electric blue. Sparkle particles, links, info.
+const Color kPrimaryBlue   = Color(0xFF1A73E8);
 
-/// Light green for progress fills and success chips.
-const Color kGreenLight = Color(0xFF5BA882);
+/// XP, ZamCoins, streak, and reward indicators.
+const Color kGold          = Color(0xFFFFB703);
 
-/// Background colour — warm Cream.
-const Color kCream = Color(0xFFFFF8E7);
+/// Success / completed state.
+const Color kGreen         = Color(0xFF2BC48A);
 
-/// Primary text colour — Dark Charcoal.
-const Color kCharcoal = Color(0xFF2C2C2C);
+/// Primary text on dark backgrounds — near-white.
+const Color kCharcoal      = Color(0xFFE2E8F0);
 
-/// Secondary text colour — lighter charcoal.
-const Color kCharcoalLight = Color(0xFF6B6B6B);
-
-/// Highlight colour — Gold. Used for ZamCoins, badges, and streak indicators.
-const Color kGold = Color(0xFFFFD700);
-
-/// Locked level node colour.
-const Color kLocked = Color(0xFFB0B0B0);
-
-/// Warning / caution colour (e.g. savings below 10%).
-const Color kWarning = Color(0xFFE57C00);
-
-/// Error colour.
-const Color kError = Color(0xFFD32F2F);
+/// Secondary / muted text on dark backgrounds.
+const Color kCharcoalLight = Color(0xFF94A3B8);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Typography
+// Semantic Aliases  (keep file-level references in other widgets compiling)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Poppins is used for all headings and display text.
-TextStyle _poppins({
+/// Alias: copper accent → neon mint in the dark palette.
+const Color kCopper        = kNeonMint;
+
+/// Alias: lighter copper → neon mint (used for borders / chips).
+const Color kCopperLight   = kNeonMint;
+
+/// Alias: cream surface → deep navy (used as card fill in light-era widgets).
+const Color kCream         = kDeepNavy;
+
+/// Alias: copper surface → core navy.
+const Color kCopperSurface = kCoreNavy;
+
+/// Warning / caution — amber orange.
+const Color kWarning       = Color(0xFFFB8500);
+
+/// Error / wrong-answer red.
+const Color kError         = Color(0xFFEF5350);
+
+/// Lighter success shade.
+const Color kGreenLight    = Color(0xFF52D9A4);
+
+/// Locked-state grey.
+const Color kLocked        = Color(0xFF475569);
+
+/// Alias kept for router / bottom-nav usage.
+const Color kPrimary       = kNeonMint;
+
+/// Alias: background surface.
+const Color kBackground    = kCoreNavy;
+
+/// Alias: surface.
+const Color kSurface       = kDeepNavy;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Typography Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Orbitron — stat numbers, hero display text, XP values.
+TextStyle _orbitron({
   double size = 14,
-  FontWeight weight = FontWeight.w400,
+  FontWeight weight = FontWeight.w700,
   Color color = kCharcoal,
   double? height,
+  double? letterSpacing,
 }) =>
-    GoogleFonts.poppins(
-        fontSize: size, fontWeight: weight, color: color, height: height);
+    GoogleFonts.orbitron(
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      height: height,
+      letterSpacing: letterSpacing,
+    );
 
-/// Inter is used for all body text, captions, and form fields.
+/// Rajdhani — all headings, titles, button labels, nav labels.
+TextStyle _rajdhani({
+  double size = 14,
+  FontWeight weight = FontWeight.w600,
+  Color color = kCharcoal,
+  double? height,
+  double? letterSpacing,
+}) =>
+    GoogleFonts.rajdhani(
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      height: height,
+      letterSpacing: letterSpacing,
+    );
+
+/// Inter — body copy, descriptions, form fields, captions.
 TextStyle _inter({
   double size = 14,
   FontWeight weight = FontWeight.w400,
@@ -73,249 +117,309 @@ TextStyle _inter({
   double? height,
 }) =>
     GoogleFonts.inter(
-        fontSize: size, fontWeight: weight, color: color, height: height);
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      height: height,
+    );
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Text Theme
 // ─────────────────────────────────────────────────────────────────────────────
 
 final TextTheme _textTheme = TextTheme(
-  // Display — large hero text
-  displayLarge: _poppins(size: 32, weight: FontWeight.w700, color: kCharcoal),
-  displayMedium: _poppins(size: 28, weight: FontWeight.w700, color: kCharcoal),
-  displaySmall: _poppins(size: 24, weight: FontWeight.w600, color: kCharcoal),
+  // Display — Orbitron for large numeric/hero moments
+  displayLarge:  _orbitron(size: 32, weight: FontWeight.w800),
+  displayMedium: _orbitron(size: 28, weight: FontWeight.w800),
+  displaySmall:  _orbitron(size: 24, weight: FontWeight.w700),
 
-  // Headlines
-  headlineLarge: _poppins(size: 22, weight: FontWeight.w700, color: kCharcoal),
-  headlineMedium: _poppins(size: 20, weight: FontWeight.w600, color: kCharcoal),
-  headlineSmall: _poppins(size: 18, weight: FontWeight.w600, color: kCharcoal),
+  // Headlines — Rajdhani
+  headlineLarge:  _rajdhani(size: 22, weight: FontWeight.w700, letterSpacing: 0.5),
+  headlineMedium: _rajdhani(size: 20, weight: FontWeight.w600, letterSpacing: 0.4),
+  headlineSmall:  _rajdhani(size: 18, weight: FontWeight.w600, letterSpacing: 0.3),
 
-  // Titles
-  titleLarge: _poppins(size: 16, weight: FontWeight.w600, color: kCharcoal),
-  titleMedium: _poppins(size: 14, weight: FontWeight.w600, color: kCharcoal),
-  titleSmall: _poppins(size: 12, weight: FontWeight.w600, color: kCharcoal),
+  // Titles — Rajdhani
+  titleLarge:  _rajdhani(size: 16, weight: FontWeight.w600),
+  titleMedium: _rajdhani(size: 14, weight: FontWeight.w600),
+  titleSmall:  _rajdhani(size: 12, weight: FontWeight.w600),
 
   // Body — Inter
-  bodyLarge:
-      _inter(size: 16, weight: FontWeight.w400, color: kCharcoal, height: 1.5),
-  bodyMedium:
-      _inter(size: 14, weight: FontWeight.w400, color: kCharcoal, height: 1.5),
-  bodySmall: _inter(
-      size: 12, weight: FontWeight.w400, color: kCharcoalLight, height: 1.4),
+  bodyLarge:  _inter(size: 16, weight: FontWeight.w400, height: 1.55),
+  bodyMedium: _inter(size: 14, weight: FontWeight.w400, height: 1.55),
+  bodySmall:  _inter(size: 12, weight: FontWeight.w400, color: kCharcoalLight, height: 1.55),
 
-  // Label — Inter
-  labelLarge: _inter(size: 14, weight: FontWeight.w500, color: kCharcoal),
-  labelMedium: _inter(size: 12, weight: FontWeight.w500, color: kCharcoal),
-  labelSmall: _inter(size: 10, weight: FontWeight.w500, color: kCharcoalLight),
+  // Label — Rajdhani
+  labelLarge:  _rajdhani(size: 14, weight: FontWeight.w500),
+  labelMedium: _rajdhani(size: 12, weight: FontWeight.w500),
+  labelSmall:  _rajdhani(size: 10, weight: FontWeight.w500, color: kCharcoalLight),
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Card Decoration Helper
+// Glassmorphism Card Helper
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Returns a standard ZamWealth card [BoxDecoration] with a 12 px radius
-/// and a subtle copper-tinted drop shadow.
+/// Returns a dark-glass [BoxDecoration] for use inside a [ClipRRect] with
+/// the given [radius]. Pair with [GlassCard] for a ready-made widget.
 BoxDecoration zamCard({
-  Color background = Colors.white,
-  double radius = 12,
   bool highlighted = false,
+  double radius = 16,
 }) =>
     BoxDecoration(
-      color: background,
+      color: kDeepNavy.withValues(alpha: 0.60),
       borderRadius: BorderRadius.circular(radius),
-      border: highlighted
-          ? Border.all(color: kCopper.withValues(alpha: 0.6), width: 1.5)
-          : null,
+      border: Border.all(
+        color: highlighted
+            ? kNeonMint.withValues(alpha: 0.50)
+            : Colors.white.withValues(alpha: 0.08),
+        width: highlighted ? 1.5 : 1.0,
+      ),
       boxShadow: [
         BoxShadow(
-          color: kCopper.withValues(alpha: 0.12),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
+          color: Colors.black.withValues(alpha: 0.30),
+          blurRadius: 20,
+          spreadRadius: 0,
         ),
       ],
     );
+
+/// Drop-in dark-glass card widget. Wraps [child] in a [ClipRRect] +
+/// [BackdropFilter] blur + [zamCard] decoration.
+class GlassCard extends StatelessWidget {
+  const GlassCard({
+    super.key,
+    required this.child,
+    this.highlighted = false,
+    this.padding = const EdgeInsets.all(16),
+    this.radius = 16,
+  });
+
+  final Widget child;
+  final bool highlighted;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: zamCard(highlighted: highlighted, radius: radius),
+          padding: padding,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Theme Data
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// The central [ThemeData] used by the app's [MaterialApp].
+/// The single [ThemeData] used by the app's [MaterialApp] — dark sci-fi palette.
 final ThemeData zamWealthTheme = ThemeData(
   useMaterial3: true,
+  brightness: Brightness.dark,
   colorScheme: ColorScheme(
-    brightness: Brightness.light,
-    primary: kCopper,
-    onPrimary: Colors.white,
-    primaryContainer: kCopperSurface,
-    onPrimaryContainer: kCharcoal,
-    secondary: kGreen,
-    onSecondary: Colors.white,
-    secondaryContainer: kGreen.withValues(alpha: 0.15),
-    onSecondaryContainer: kCharcoal,
+    brightness: Brightness.dark,
+    primary: kNeonMint,
+    onPrimary: kCoreNavy,
+    primaryContainer: kNeonMint.withValues(alpha: 0.15),
+    onPrimaryContainer: kNeonMint,
+    secondary: kPrimaryBlue,
+    onSecondary: kCoreNavy,
+    secondaryContainer: kPrimaryBlue.withValues(alpha: 0.15),
+    onSecondaryContainer: kPrimaryBlue,
     tertiary: kGold,
-    onTertiary: kCharcoal,
+    onTertiary: kCoreNavy,
     tertiaryContainer: kGold.withValues(alpha: 0.15),
-    onTertiaryContainer: kCharcoal,
+    onTertiaryContainer: kGold,
     error: kError,
     onError: Colors.white,
-    errorContainer: kError.withValues(alpha: 0.1),
+    errorContainer: kError.withValues(alpha: 0.20),
     onErrorContainer: kError,
-    surface: Colors.white,
+    surface: kDeepNavy,
     onSurface: kCharcoal,
-    surfaceContainerHighest: kCream,
+    surfaceContainerHighest: kCoreNavy,
     onSurfaceVariant: kCharcoalLight,
-    outline: kCopperLight.withValues(alpha: 0.4),
-    shadow: kCopper.withValues(alpha: 0.12),
+    outline: kNeonMint.withValues(alpha: 0.25),
+    shadow: Colors.black.withValues(alpha: 0.50),
   ),
-  scaffoldBackgroundColor: kCream,
+  scaffoldBackgroundColor: kCoreNavy,
   textTheme: _textTheme,
 
-  // ── AppBar ──
+  // ── AppBar ──────────────────────────────────────────────────────────────────
   appBarTheme: AppBarTheme(
-    backgroundColor: kCopper,
-    foregroundColor: Colors.white,
+    backgroundColor: Colors.transparent,
+    foregroundColor: kCharcoal,
     elevation: 0,
     centerTitle: true,
-    titleTextStyle:
-        _poppins(size: 18, weight: FontWeight.w700, color: Colors.white),
+    titleTextStyle: _rajdhani(size: 18, weight: FontWeight.w700, letterSpacing: 0.5),
   ),
 
-  // ── Elevated Button ──
+  // ── Elevated Button ──────────────────────────────────────────────────────────
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: kCopper,
-      foregroundColor: Colors.white,
+      backgroundColor: kNeonMint,
+      foregroundColor: kCoreNavy,
       minimumSize: const Size.fromHeight(52),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      textStyle: _poppins(size: 15, weight: FontWeight.w600),
-      elevation: 2,
-      shadowColor: kCopper.withValues(alpha: 0.4),
+      textStyle: _rajdhani(size: 16, weight: FontWeight.w700, letterSpacing: 0.8),
+      elevation: 0,
     ),
   ),
 
-  // ── Outlined Button ──
+  // ── Outlined Button ──────────────────────────────────────────────────────────
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
-      foregroundColor: kCopper,
+      foregroundColor: kNeonMint,
       minimumSize: const Size.fromHeight(52),
-      side: const BorderSide(color: kCopper, width: 1.5),
+      side: const BorderSide(color: kNeonMint, width: 1.5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      textStyle: _poppins(size: 15, weight: FontWeight.w600, color: kCopper),
+      textStyle: _rajdhani(size: 16, weight: FontWeight.w600, letterSpacing: 0.5),
     ),
   ),
 
-  // ── Text Button ──
+  // ── Text Button ──────────────────────────────────────────────────────────────
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(
-      foregroundColor: kCopper,
-      textStyle: _poppins(size: 14, weight: FontWeight.w600, color: kCopper),
+      foregroundColor: kNeonMint,
+      textStyle: _rajdhani(size: 14, weight: FontWeight.w600, letterSpacing: 0.3),
       minimumSize: const Size(48, 48),
     ),
   ),
 
-  // ── Input Fields ──
+  // ── Input Fields ─────────────────────────────────────────────────────────────
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
-    fillColor: Colors.white,
+    fillColor: kDeepNavy,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: kCopperLight.withValues(alpha: 0.4)),
+      borderSide: BorderSide(color: kNeonMint.withValues(alpha: 0.20)),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: kCopperLight.withValues(alpha: 0.4)),
+      borderSide: BorderSide(color: kNeonMint.withValues(alpha: 0.20)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: kCopper, width: 2),
+      borderSide: const BorderSide(color: kNeonMint, width: 1.5),
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: const BorderSide(color: kError),
     ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: kError, width: 1.5),
+    ),
     labelStyle: _inter(size: 14, color: kCharcoalLight),
     hintStyle: _inter(size: 14, color: kCharcoalLight),
+    errorStyle: _inter(size: 12, color: kError),
   ),
 
-  // ── Card ──
+  // ── Card ─────────────────────────────────────────────────────────────────────
   cardTheme: CardThemeData(
-    color: Colors.white,
+    color: kDeepNavy,
     elevation: 0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(color: Colors.white.withValues(alpha: 0.07)),
+    ),
     margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
   ),
 
-  // ── Bottom Navigation Bar ──
-  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-    backgroundColor: Colors.white,
-    selectedItemColor: kCopper,
+  // ── Bottom Navigation Bar ─────────────────────────────────────────────────────
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: const Color(0xFF0A1628),
+    selectedItemColor: kNeonMint,
     unselectedItemColor: kCharcoalLight,
-    selectedIconTheme: IconThemeData(size: 26),
-    unselectedIconTheme: IconThemeData(size: 24),
+    selectedIconTheme: const IconThemeData(size: 26),
+    unselectedIconTheme: const IconThemeData(size: 24),
     showUnselectedLabels: true,
     type: BottomNavigationBarType.fixed,
-    elevation: 8,
+    elevation: 0,
+    selectedLabelStyle: _rajdhani(size: 11, weight: FontWeight.w600, color: kNeonMint),
+    unselectedLabelStyle: _rajdhani(size: 11, color: kCharcoalLight),
   ),
 
-  // ── Chip ──
+  // ── Chip ─────────────────────────────────────────────────────────────────────
   chipTheme: ChipThemeData(
-    backgroundColor: kCopperSurface,
-    selectedColor: kCopper.withValues(alpha: 0.2),
+    backgroundColor: kDeepNavy,
+    selectedColor: kNeonMint.withValues(alpha: 0.20),
     labelStyle: _inter(size: 13, color: kCharcoal),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: BorderSide(color: kNeonMint.withValues(alpha: 0.25)),
+    ),
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
   ),
 
-  // ── Slider ──
+  // ── Slider ───────────────────────────────────────────────────────────────────
   sliderTheme: SliderThemeData(
-    activeTrackColor: kCopper,
-    inactiveTrackColor: kCopperLight.withValues(alpha: 0.3),
-    thumbColor: kCopper,
-    overlayColor: kCopper.withValues(alpha: 0.15),
-    valueIndicatorColor: kCopper,
-    valueIndicatorTextStyle: _inter(size: 12, color: Colors.white),
+    activeTrackColor: kNeonMint,
+    inactiveTrackColor: kNeonMint.withValues(alpha: 0.20),
+    thumbColor: kNeonMint,
+    overlayColor: kNeonMint.withValues(alpha: 0.15),
+    valueIndicatorColor: kNeonMint,
+    valueIndicatorTextStyle: _orbitron(size: 12, color: kCoreNavy),
   ),
 
-  // ── Divider ──
+  // ── Divider ──────────────────────────────────────────────────────────────────
   dividerTheme: DividerThemeData(
-    color: kCopperLight.withValues(alpha: 0.25),
+    color: Colors.white.withValues(alpha: 0.08),
     thickness: 1,
     space: 1,
   ),
 
-  // ── SnackBar ──
+  // ── SnackBar ─────────────────────────────────────────────────────────────────
   snackBarTheme: SnackBarThemeData(
-    backgroundColor: kCharcoal,
-    contentTextStyle: _inter(size: 14, color: Colors.white),
+    backgroundColor: kDeepNavy,
+    contentTextStyle: _inter(size: 14, color: kCharcoal),
     behavior: SnackBarBehavior.floating,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+      side: BorderSide(color: kNeonMint.withValues(alpha: 0.30)),
+    ),
   ),
 
-  // ── FloatingActionButton ──
+  // ── FloatingActionButton ──────────────────────────────────────────────────────
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
-    backgroundColor: kCopper,
-    foregroundColor: Colors.white,
+    backgroundColor: kNeonMint,
+    foregroundColor: kCoreNavy,
     elevation: 4,
   ),
+
+  // ── Icon ─────────────────────────────────────────────────────────────────────
+  iconTheme: const IconThemeData(color: kCharcoal),
+  primaryIconTheme: const IconThemeData(color: kNeonMint),
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Reusable Gradient
+// Gradients
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// The copper-to-green gradient used as the splash/onboarding background
-/// and on premium level header cards.
+/// Core navy → deep navy gradient — used on splash and premium headers.
 const LinearGradient kZamGradient = LinearGradient(
-  colors: [kCopper, Color(0xFF8A5A1F), kGreen],
+  colors: [kCoreNavy, kDeepNavy, Color(0xFF0A2540)],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
-  stops: [0.0, 0.5, 1.0],
+  stops: [0.0, 0.50, 1.0],
 );
 
-/// A subtle cream-to-white gradient for section backgrounds.
-const LinearGradient kCreamGradient = LinearGradient(
-  colors: [kCream, Colors.white],
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
+/// Teal → blue gradient — used on action buttons and progress fills.
+const LinearGradient kAccentGradient = LinearGradient(
+  colors: [kNeonMint, kPrimaryBlue],
+  begin: Alignment.centerLeft,
+  end: Alignment.centerRight,
+);
+
+/// Gold → amber gradient — used on XP bars and reward cards.
+const LinearGradient kGoldGradient = LinearGradient(
+  colors: [kGold, Color(0xFFFB8500)],
+  begin: Alignment.centerLeft,
+  end: Alignment.centerRight,
 );

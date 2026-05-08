@@ -1,4 +1,4 @@
-﻿/// login_screen.dart
+/// login_screen.dart
 /// Purpose: Login screen — validates credentials against Hive and routes
 ///          authenticated users to the dashboard or onboarding flow.
 /// Reads from: authProvider
@@ -9,12 +9,12 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:zamwealth_quest/core/router.dart';
 import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
+import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
 
-/// [LoginScreen] provides username and password fields and delegates
-/// authentication logic entirely to [AuthNotifier].
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -35,24 +35,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  /// Validates the form and triggers [AuthNotifier.login].
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-
     await ref.read(authProvider.notifier).login(
           _usernameCtrl.text.trim(),
           _passwordCtrl.text,
         );
-
-    // Navigation is handled by GoRouter redirect — nothing to do here on success.
-    // On failure, the error is shown via the auth state listener below.
   }
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
-    // Show error SnackBar when auth notifier emits an error
     ref.listen<AuthState>(authProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -65,54 +59,90 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: kZamGradient),
+      backgroundColor: Colors.transparent,
+      body: AnimatedGradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
-                // ── Brand Header ─────────────────────────────────────────
-                Text(
-                  'ZamWealth Quest',
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
+                // ── Logo / Brand ──────────────────────────────────────────
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: kNeonMint.withValues(alpha: 0.60), width: 1.5),
+                    color: kNeonMint.withValues(alpha: 0.08),
+                  ),
+                  child: const Center(
+                    child: Text('ZQ', style: TextStyle(fontSize: 22, color: kNeonMint, fontWeight: FontWeight.w800)),
+                  ),
                 ),
-                const SizedBox(height: 6),
+
+                const SizedBox(height: 20),
+
+                Text(
+                  'ZAMWEALTH',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: kCharcoal,
+                    letterSpacing: 3.0,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'QUEST',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: kNeonMint,
+                    letterSpacing: 5.0,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
                 Text(
                   'Sign in to continue your journey',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: kCharcoalLight,
                       ),
                 ),
 
                 const SizedBox(height: 40),
 
-                // ── Form Card ────────────────────────────────────────────
-                Container(
+                // ── Form Card ─────────────────────────────────────────────
+                GlassCard(
                   padding: const EdgeInsets.all(24),
-                  decoration: zamCard(radius: 20),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Welcome back 👋',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          'Welcome back',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: kCharcoal,
+                                letterSpacing: 0.5,
+                              ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Enter your credentials to continue',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 24),
 
                         // Username field
                         TextFormField(
                           controller: _usernameCtrl,
-                          decoration: const InputDecoration(
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
+                          decoration: InputDecoration(
                             labelText: 'Username',
-                            prefixIcon: Icon(Icons.person_outline),
+                            prefixIcon: Icon(Icons.person_outline, color: kNeonMint.withValues(alpha: 0.70), size: 20),
                           ),
                           textInputAction: TextInputAction.next,
                           autocorrect: false,
@@ -130,14 +160,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         TextFormField(
                           controller: _passwordCtrl,
                           obscureText: _obscurePassword,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: Icon(Icons.lock_outline, color: kNeonMint.withValues(alpha: 0.70), size: 20),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
                                     ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
+                                color: kCharcoalLight,
+                                size: 20,
                               ),
                               onPressed: () => setState(
                                 () => _obscurePassword = !_obscurePassword,
@@ -156,7 +189,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                         const SizedBox(height: 28),
 
-                        // Login button
+                        // Sign In button
                         ElevatedButton(
                           onPressed: authState.isLoading ? null : _submit,
                           child: authState.isLoading
@@ -164,33 +197,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   height: 22,
                                   width: 22,
                                   child: CircularProgressIndicator(
-                                    color: Colors.white,
+                                    color: kCoreNavy,
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Text('Sign In'),
+                              : const Text('SIGN IN'),
                         ),
 
                         const SizedBox(height: 16),
 
-                        // Divider
-                        const Row(
+                        Row(
                           children: [
-                            Expanded(child: Divider()),
+                            Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.12))),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text('or'),
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(
+                                'or',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
                             ),
-                            Expanded(child: Divider()),
+                            Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.12))),
                           ],
                         ),
 
                         const SizedBox(height: 16),
 
-                        // Register link
                         OutlinedButton(
                           onPressed: () => context.go(AppRoutes.register),
-                          child: const Text('Create New Account'),
+                          child: const Text('CREATE NEW ACCOUNT'),
                         ),
                       ],
                     ),
@@ -199,34 +233,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 32),
 
-                // ── Offline Notice ───────────────────────────────────────
+                // ── Offline Badge ─────────────────────────────────────────
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
+                    color: kNeonMint.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: kNeonMint.withValues(alpha: 0.25)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.offline_bolt_outlined,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
+                      const Icon(Icons.offline_bolt_outlined, color: kNeonMint, size: 14),
+                      const SizedBox(width: 6),
                       Text(
                         '100% offline — no internet needed',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white,
+                              color: kNeonMint,
                             ),
                       ),
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 24),
               ],
             ),
           ),

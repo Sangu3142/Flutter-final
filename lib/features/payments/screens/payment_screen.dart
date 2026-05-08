@@ -1,4 +1,4 @@
-﻿/// payment_screen.dart
+/// payment_screen.dart
 /// Purpose: Simulated payment screen for unlocking a level. Shows the
 ///          SIMULATED PAYMENT banner, MTN MoMo / Airtel Money selector,
 ///          a 2-second processing spinner, and a success dialog on completion.
@@ -8,14 +8,27 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/core/router.dart';
-import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/payments/providers/payment_provider.dart';
+import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
 
-/// [PaymentScreen] presents the full-screen payment UI for a given level.
+// ─────────────────────────────────────────────────────────────────────────────
+// Palette constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Color _kDeepNavy  = Color(0xFF0D1B2A);
+const Color _kNeonMint  = Color(0xFF36ECDE);
+const Color _kGold      = Color(0xFFFFB703);
+const Color _kGreen     = Color(0xFF2BC48A);
+const Color _kSoftGray  = Color(0xFFE6E9EC);
+const Color _kWarning   = Color(0xFFFB8500);
+const Color _kError     = Color(0xFFEF5350);
+
 class PaymentScreen extends ConsumerStatefulWidget {
   const PaymentScreen({super.key, required this.levelId});
 
@@ -27,14 +40,29 @@ class PaymentScreen extends ConsumerStatefulWidget {
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   String _selectedProvider = kProviderMTN;
+  final TextEditingController _phoneController = TextEditingController();
+  String? _phoneError;
 
   @override
   void initState() {
     super.initState();
-    // Reset any leftover payment state when opening this screen
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(paymentProvider.notifier).reset();
     });
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  String? _validatePhone(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return 'Please enter your phone number';
+    if (digits.length < 9) return 'Phone number must be at least 9 digits';
+    if (digits.length > 12) return 'Phone number is too long';
+    return null;
   }
 
   @override
@@ -43,10 +71,12 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     final payState = ref.watch(paymentProvider);
 
     if (meta == null) {
-      return const Scaffold(body: Center(child: Text('Invalid level')));
+      return const Scaffold(
+        backgroundColor: _kDeepNavy,
+        body: Center(child: Text('Invalid level', style: TextStyle(color: _kSoftGray))),
+      );
     }
 
-    // Listen for success → show dialog then navigate back
     ref.listen<PaymentState>(paymentProvider, (prev, next) {
       if (next.isSuccess && !(prev?.isSuccess ?? false)) {
         _showSuccessDialog(context, meta);
@@ -54,118 +84,150 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     });
 
     return Scaffold(
-      backgroundColor: kCream,
-      body: SafeArea(
-        child: SingleChildScrollView(
+      backgroundColor: Colors.transparent,
+      body: AnimatedGradientBackground(
+        child: SafeArea(
           child: Column(
             children: [
-              // ── SIMULATED PAYMENT Banner ─────────────────────────────
+              // ── SIMULATED PAYMENT Banner ──────────────────────────────
               _simulatedBanner(context),
 
-              // ── App Bar (manual) ─────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => context.pop(),
-                      icon: const Icon(Icons.arrow_back_ios),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Unlock ${meta.name}',
-                        style: Theme.of(context).textTheme.titleLarge,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // ── Manual App Bar ────────────────────────────────
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                onPressed: () => context.pop(),
+                                icon: const Icon(
+                                  Icons.arrow_back_ios,
+                                  color: _kSoftGray,
+                                  size: 20,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  'Unlock ${meta.name}',
+                                  style: GoogleFonts.rajdhani(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: _kSoftGray,
+                                    letterSpacing: 0.4,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ── Level Summary Card ────────────────────────────
-                    _levelSummaryCard(context, meta),
+                        // ── Level Summary Card ─────────────────────────────
+                        _levelSummaryCard(context, meta),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
-                    // ── What You Unlock ────────────────────────────────
-                    _whatYouUnlock(context, meta),
+                        // ── What You Unlock ────────────────────────────────
+                        _whatYouUnlock(context, meta),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
-                    // ── Provider Selector ──────────────────────────────
-                    Text(
-                      'Choose Payment Method',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    _providerSelector(context),
+                        // ── Provider Selector ──────────────────────────────
+                        Text(
+                          'Choose Payment Method',
+                          style: GoogleFonts.rajdhani(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: _kSoftGray,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _providerSelector(context),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
-                    // ── Phone Number Field (UI only, no validation) ────
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: '$_selectedProvider Phone Number',
-                        prefixText: '+260 ',
-                        prefixIcon: const Icon(Icons.phone_android),
-                        hintText: '97 XXX XXXX',
-                      ),
-                      keyboardType: TextInputType.phone,
-                      enabled: !payState.isProcessing,
-                    ),
+                        // ── Phone Number Field ─────────────────────────────
+                        TextField(
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          enabled: !payState.isProcessing,
+                          maxLength: 13,
+                          style: GoogleFonts.inter(color: _kSoftGray, fontSize: 15),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'[\d+]')),
+                          ],
+                          onChanged: (_) {
+                            setState(() {
+                              if (_phoneError != null) _phoneError = null;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: '$_selectedProvider Phone Number',
+                            prefixText: '+260 ',
+                            prefixStyle: GoogleFonts.inter(color: _kNeonMint, fontSize: 14),
+                            prefixIcon: Icon(Icons.phone_android, color: _kNeonMint.withValues(alpha: 0.70), size: 20),
+                            hintText: '97 XXX XXXX',
+                            counterText: '',
+                            errorText: _phoneError,
+                          ),
+                        ),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
-                    // ── Pay Button ─────────────────────────────────────
-                    _payButton(context, meta, payState),
+                        // ── Pay Button ─────────────────────────────────────
+                        _payButton(context, meta, payState),
 
-                    const SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
-                    // ── ZamCoins bonus notice ─────────────────────────
-                    Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('🪙', style: TextStyle(fontSize: 18)),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Earn $kPaymentBonusZamCoins ZamCoins on unlock!',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: kCharcoalLight),
+                        // ── ZamCoins bonus notice ──────────────────────────
+                        Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('🪙', style: TextStyle(fontSize: 16)),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Earn $kPaymentBonusZamCoins ZamCoins on unlock!',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  color: _kGold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // ── Error display ──────────────────────────────────
+                        if (payState.isFailure && payState.error != null) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: _kError.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: _kError.withValues(alpha: 0.60)),
+                            ),
+                            child: Text(
+                              payState.error!,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: _kError,
+                              ),
+                            ),
                           ),
                         ],
-                      ),
+
+                        const SizedBox(height: 32),
+                      ],
                     ),
-
-                    const SizedBox(height: 20),
-
-                    // ── Error display ──────────────────────────────────
-                    if (payState.isFailure && payState.error != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: kError.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: kError),
-                        ),
-                        child: Text(
-                          payState.error!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: kError),
-                        ),
-                      ),
-
-                    const SizedBox(height: 32),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -177,24 +239,40 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   // ── SIMULATED PAYMENT Banner ──────────────────────────────────────────────
 
-  /// This banner must always be visible on the payment screen to clearly
-  /// communicate to users that no real payment is being processed.
   Widget _simulatedBanner(BuildContext context) {
+    final phone = _phoneController.text.trim();
+    final hasPhone = phone.isNotEmpty;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      color: kWarning,
+      color: _kWarning.withValues(alpha: 0.90),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.science_outlined, color: Colors.white, size: 18),
+          const Icon(Icons.science_outlined, color: Colors.white, size: 16),
           const SizedBox(width: 8),
-          Text(
-            '⚠️ SIMULATED PAYMENT — No real money is transferred',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          Flexible(
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.rajdhani(
+                  fontSize: 12,
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
                 ),
+                children: [
+                  const TextSpan(text: '⚠️ SIMULATED PAYMENT'),
+                  if (hasPhone) ...[
+                    const TextSpan(text: ' TO '),
+                    TextSpan(
+                      text: phone,
+                      style: const TextStyle(color: _kNeonMint),
+                    ),
+                  ],
+                  const TextSpan(text: ' — No real money is transferred'),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -207,8 +285,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: kZamGradient,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1A73E8), Color(0xFF0D1B2A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _kNeonMint.withValues(alpha: 0.30)),
       ),
       child: Row(
         children: [
@@ -220,29 +303,34 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               children: [
                 Text(
                   'Level ${meta.id}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: _kSoftGray.withValues(alpha: 0.70),
+                  ),
                 ),
                 Text(
                   meta.name,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white, fontWeight: FontWeight.w700),
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: 0.4,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: kGold,
+                    color: _kGold,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     'ZMW ${meta.price.toStringAsFixed(0)} / month',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: kCharcoal,
-                          fontWeight: FontWeight.w800,
-                        ),
+                    style: GoogleFonts.orbitron(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0D1B2A),
+                    ),
                   ),
                 ),
               ],
@@ -259,20 +347,29 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('What you unlock:',
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'What you unlock:',
+          style: GoogleFonts.rajdhani(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: _kSoftGray,
+            letterSpacing: 0.4,
+          ),
+        ),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(14),
-          decoration: zamCard(),
+          decoration: BoxDecoration(
+            color: _kDeepNavy.withValues(alpha: 0.80),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          ),
           child: Column(
             children: [
-              _unlockRow(context, '📈',
-                  '${meta.simulations.length} interactive financial simulations'),
+              _unlockRow(context, '📈', '${meta.simulations.length} interactive financial simulations'),
               _unlockRow(context, '🏆', '${meta.xpReward} XP on completion'),
               _unlockRow(context, '🏅', 'Level ${meta.id} completion badge'),
-              _unlockRow(
-                  context, '🪙', '$kPaymentBonusZamCoins bonus ZamCoins'),
+              _unlockRow(context, '🪙', '$kPaymentBonusZamCoins bonus ZamCoins'),
               ...meta.businesses.map((b) => _unlockRow(context, meta.emoji, b)),
             ],
           ),
@@ -286,14 +383,17 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 18)),
+          Text(emoji, style: const TextStyle(fontSize: 16)),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: kCharcoal)),
+            child: Text(
+              text,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: _kSoftGray,
+                height: 1.4,
+              ),
+            ),
           ),
         ],
       ),
@@ -315,21 +415,14 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               margin: EdgeInsets.only(right: isMTN ? 8 : 0),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isSelected ? kCopper.withValues(alpha: 0.08) : Colors.white,
+                color: isSelected
+                    ? _kNeonMint.withValues(alpha: 0.10)
+                    : _kDeepNavy.withValues(alpha: 0.70),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: isSelected ? kCopper : kCopperLight.withValues(alpha: 0.3),
-                  width: isSelected ? 2 : 1,
+                  color: isSelected ? _kNeonMint : Colors.white.withValues(alpha: 0.12),
+                  width: isSelected ? 1.5 : 1,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: kCopper.withValues(alpha: 0.15),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        )
-                      ]
-                    : [],
               ),
               child: Column(
                 children: [
@@ -340,14 +433,15 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   const SizedBox(height: 4),
                   Text(
                     provider,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: isSelected ? kCopper : kCharcoal,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? _kNeonMint : _kSoftGray,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   if (isSelected)
-                    const Icon(Icons.check_circle, color: kCopper, size: 16),
+                    const Icon(Icons.check_circle, color: _kNeonMint, size: 16),
                 ],
               ),
             ),
@@ -359,22 +453,22 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   // ── Pay Button ────────────────────────────────────────────────────────────
 
-  Widget _payButton(
-    BuildContext context,
-    LevelMeta meta,
-    PaymentState payState,
-  ) {
+  Widget _payButton(BuildContext context, LevelMeta meta, PaymentState payState) {
     return ElevatedButton(
       onPressed: payState.isProcessing
           ? null
-          : () => ref.read(paymentProvider.notifier).initiatePayment(
-                levelId: widget.levelId,
-                provider: _selectedProvider,
-              ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: payState.isProcessing ? kCopperLight : kCopper,
-        minimumSize: const Size.fromHeight(56),
-      ),
+          : () {
+              final error = _validatePhone(_phoneController.text);
+              if (error != null) {
+                setState(() => _phoneError = error);
+                return;
+              }
+              setState(() => _phoneError = null);
+              ref.read(paymentProvider.notifier).initiatePayment(
+                    levelId: widget.levelId,
+                    provider: _selectedProvider,
+                  );
+            },
       child: payState.isProcessing
           ? Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -383,19 +477,28 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: Color(0xFF0D1B2A),
                     strokeWidth: 2.5,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   'Processing via $_selectedProvider...',
-                  style: const TextStyle(color: Colors.white),
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0D1B2A),
+                  ),
                 ),
               ],
             )
           : Text(
-              'Pay ZMW ${meta.price.toStringAsFixed(0)} via $_selectedProvider',
+              'PAY ZMW ${meta.price.toStringAsFixed(0)} VIA $_selectedProvider',
+              style: GoogleFonts.rajdhani(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
             ),
     );
   }
@@ -406,63 +509,76 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: const EdgeInsets.all(24),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🎉', style: TextStyle(fontSize: 56)),
-            const SizedBox(height: 12),
-            Text(
-              'Level Unlocked!',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: kGreen,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${meta.emoji} ${meta.name}',
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: kGold.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
+      builder: (_) => Dialog(
+        backgroundColor: _kDeepNavy,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: _kGreen.withValues(alpha: 0.50), width: 1.5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🎉', style: TextStyle(fontSize: 56)),
+              const SizedBox(height: 12),
+              Text(
+                'Level Unlocked!',
+                style: GoogleFonts.rajdhani(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: _kGreen,
+                  letterSpacing: 0.5,
+                ),
+                textAlign: TextAlign.center,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('🪙', style: TextStyle(fontSize: 18)),
-                  const SizedBox(width: 6),
-                  Text(
-                    '+$kPaymentBonusZamCoins ZamCoins awarded!',
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelMedium
-                        ?.copyWith(color: kCopper, fontWeight: FontWeight.w700),
-                  ),
-                ],
+              const SizedBox(height: 6),
+              Text(
+                '${meta.emoji} ${meta.name}',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  color: _kSoftGray,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // dismiss dialog
-                  ref.read(paymentProvider.notifier).reset();
-                  context.go(AppRoutes.levels); // navigate to level map
-                },
-                child: const Text('Go to Level Map →'),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _kGold.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: _kGold.withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🪙', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 6),
+                    Text(
+                      '+$kPaymentBonusZamCoins ZamCoins awarded!',
+                      style: GoogleFonts.orbitron(
+                        fontSize: 12,
+                        color: _kGold,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref.read(paymentProvider.notifier).reset();
+                    context.go(AppRoutes.levels);
+                  },
+                  child: const Text('GO TO LEVEL MAP →'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

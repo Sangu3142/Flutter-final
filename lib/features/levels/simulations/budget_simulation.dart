@@ -2,26 +2,30 @@
 /// Purpose: Level 1 Budget Allocator simulation — drag sliders to allocate
 ///          ZMW 3,500 monthly income across 5 categories. Warns when savings
 ///          drops below 10% (ZMW 350). Awards 'budget_master' badge on submit.
-/// Reads from: nothing (self-contained stateful widget)
-/// Writes to: nothing directly (calls onComplete callback)
+/// Reads from: authProvider (uid for Hive key)
+/// Writes to: Hive kSettingsBox key 'budget_alloc_<uid>'
 /// Navigation: → dismissed via onComplete → level_screen marks sim done
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/core/theme.dart';
+import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
 
 /// [BudgetSimulation] teaches players how to allocate a fixed monthly income.
-class BudgetSimulation extends StatefulWidget {
+class BudgetSimulation extends ConsumerStatefulWidget {
   const BudgetSimulation({super.key, required this.onComplete});
 
   /// Called when the player taps "Submit Budget" — triggers level progression.
   final VoidCallback onComplete;
 
   @override
-  State<BudgetSimulation> createState() => _BudgetSimulationState();
+  ConsumerState<BudgetSimulation> createState() => _BudgetSimulationState();
 }
 
-class _BudgetSimulationState extends State<BudgetSimulation> {
+class _BudgetSimulationState extends ConsumerState<BudgetSimulation> {
   static const double _monthlyIncome = 3500.0;
 
   // Allocation percentages per category (must sum ≤ 100)
@@ -382,7 +386,18 @@ class _BudgetSimulationState extends State<BudgetSimulation> {
 
   Widget _submitButton(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: _overBudget ? null : widget.onComplete,
+      onPressed: _overBudget
+          ? null
+          : () {
+              final uid = ref.read(currentUserProvider)?.uid;
+              if (uid != null) {
+                Hive.box(kSettingsBox).put(
+                  'budget_alloc_$uid',
+                  Map<String, dynamic>.from(_allocations),
+                );
+              }
+              widget.onComplete();
+            },
       icon: const Icon(Icons.check_circle_outline),
       label: Text(
         _overBudget ? 'Fix budget to submit' : 'Submit Budget ✓',

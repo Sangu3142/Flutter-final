@@ -18,6 +18,7 @@ import 'package:zamwealth_quest/features/auth/models/user_profile.dart';
 import 'package:zamwealth_quest/features/daily_challenge/models/daily_challenge_record.dart';
 import 'package:zamwealth_quest/features/levels/models/level_model.dart';
 import 'package:zamwealth_quest/features/payments/models/payment_record.dart';
+import 'package:zamwealth_quest/features/story/models/story_chapter_progress.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,7 @@ Future<void> main() async {
   Hive.registerAdapter(LevelModelAdapter()); // typeId 1
   Hive.registerAdapter(PaymentRecordAdapter()); // typeId 2
   Hive.registerAdapter(DailyChallengeRecordAdapter()); // typeId 3
+  Hive.registerAdapter(StoryChapterProgressAdapter()); // typeId 12
 
   // ── 3. Open all Hive boxes ───────────────────────────────────────────────
   await Future.wait([
@@ -41,6 +43,7 @@ Future<void> main() async {
     Hive.openBox(kLeaderboardBox),
     Hive.openBox(kSettingsBox),
     Hive.openBox<DailyChallengeRecord>(kDailyChallengeBox),
+    Hive.openBox<StoryChapterProgress>(kStoryBox),
   ]);
 
   // ── 4. Seed one-time initial data ────────────────────────────────────────

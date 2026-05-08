@@ -11,11 +11,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/core/router.dart';
-import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/daily_challenge/models/challenge.dart';
 import 'package:zamwealth_quest/features/daily_challenge/providers/daily_challenge_provider.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Palette constants (matches dashboard / profile dark theme)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Color _kDeepNavy   = Color(0xFF0D1B2A);
+const Color _kPrimaryBlue = Color(0xFF1A73E8);
+const Color _kNeonMint    = Color(0xFF36ECDE);
+const Color _kFreshGreen  = Color(0xFF2BC48A);
+const Color _kSoftGray    = Color(0xFFE6E9EC);
+const Color _kGold        = Color(0xFFFFB703);
+const Color _kError       = Color(0xFFEF233C);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DailyChallengeScreen
+// ─────────────────────────────────────────────────────────────────────────────
 
 /// The Daily Challenge screen — one question per day, same for all users.
 class DailyChallengeScreen extends ConsumerStatefulWidget {
@@ -76,11 +92,19 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
     final challenge = dcState.todaysChallenge;
 
     return Scaffold(
-      backgroundColor: kCream,
+      backgroundColor: _kDeepNavy,
       appBar: AppBar(
-        title: const Text('Daily Challenge'),
-        backgroundColor: kCopper,
+        backgroundColor: _kPrimaryBlue,
         foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'Daily Challenge',
+          style: GoogleFonts.rajdhani(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -88,55 +112,55 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
       ),
       body: SafeArea(
         child: dcState.isLoading
-            ? const Center(child: CircularProgressIndicator(color: kCopper))
+            ? const Center(
+                child: CircularProgressIndicator(color: _kNeonMint),
+              )
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ── Stat bar ─────────────────────────────────────────
-                    _buildStatBar(context, record),
+                    // ── Streak / Shields / Completed stat bar ─────────────
+                    _buildStatBar(record),
+                    const SizedBox(height: 20),
 
                     if (challenge == null) ...[
-                      const SizedBox(height: 40),
                       Center(
                         child: Text(
                           'No challenge available right now.',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: kCharcoalLight),
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            color: _kSoftGray,
+                          ),
                         ),
                       ),
                     ] else ...[
-                      const SizedBox(height: 20),
-
                       // ── Topic chip ────────────────────────────────────
-                      _buildTopicChip(context, challenge.topic),
+                      _buildTopicChip(challenge.topic),
                       const SizedBox(height: 12),
 
                       // ── Question card ─────────────────────────────────
-                      _buildQuestionCard(context, challenge),
+                      _buildQuestionCard(challenge),
                       const SizedBox(height: 20),
 
                       // ── Input / result area ───────────────────────────
                       if (record != null &&
                           record.completedToday &&
                           !dcState.isAnswered) ...[
-                        _buildAlreadyCompletedCard(context, challenge),
+                        _buildAlreadyCompletedCard(challenge),
                         const SizedBox(height: 20),
                         _buildBackButton(context),
                       ] else if (dcState.isAnswered) ...[
-                        _buildResultCard(context, dcState, challenge),
+                        _buildResultCard(dcState, challenge),
                         const SizedBox(height: 20),
                         _buildBackButton(context),
                       ] else ...[
                         if (challenge.type == ChallengeType.numeric)
-                          _buildNumericInput(context)
+                          _buildNumericInput()
                         else
-                          _buildOptionsList(context, challenge),
+                          _buildOptionsList(challenge),
                         const SizedBox(height: 20),
-                        _buildConfirmButton(context, challenge),
+                        _buildConfirmButton(challenge),
                       ],
                     ],
 
@@ -150,77 +174,99 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
 
   // ── Stat bar ───────────────────────────────────────────────────────────────
 
-  Widget _buildStatBar(BuildContext context, record) {
+  Widget _buildStatBar(record) {
     final streak = record?.currentStreak ?? 0;
     final shields = record?.streakShields ?? 0;
     final total = record?.totalCompleted ?? 0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: zamCard(),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: _kDeepNavy,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _kNeonMint.withValues(alpha: 0.20),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _kNeonMint.withValues(alpha: 0.10),
+            blurRadius: 16,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _statPill(context, '🔥', '$streak', 'day streak'),
-          _verticalDivider(),
-          _statPill(context, '🛡️', '$shields', 'shields'),
-          _verticalDivider(),
-          _statPill(context, '✅', '$total', 'completed'),
+          _statPill('🔥', '$streak', 'streak'),
+          _statDivider(),
+          _statPill('🛡️', '$shields', 'shields'),
+          _statDivider(),
+          _statPill('✅', '$total', 'completed'),
         ],
       ),
     );
   }
 
-  Widget _statPill(
-      BuildContext context, String emoji, String value, String label) {
+  Widget _statPill(String emoji, String value, String label) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(emoji, style: const TextStyle(fontSize: 20)),
-        const SizedBox(height: 2),
+        Text(emoji, style: const TextStyle(fontSize: 22)),
+        const SizedBox(height: 4),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: kCharcoal,
-                fontWeight: FontWeight.w700,
-              ),
+          style: GoogleFonts.rajdhani(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: _kNeonMint,
+          ),
         ),
         Text(
           label,
-          style: Theme.of(context)
-              .textTheme
-              .labelSmall
-              ?.copyWith(color: kCharcoalLight),
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            color: _kSoftGray,
+            letterSpacing: 0.5,
+          ),
         ),
       ],
     );
   }
 
-  Widget _verticalDivider() {
-    return Container(
+  Widget _statDivider() => Container(
         width: 1,
-        height: 40,
-        color: kCopperLight.withValues(alpha: 0.3));
-  }
+        height: 44,
+        color: Colors.white.withValues(alpha: 0.08),
+      );
 
   // ── Topic chip ─────────────────────────────────────────────────────────────
 
-  Widget _buildTopicChip(BuildContext context, String topic) {
+  Widget _buildTopicChip(String topic) {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: kCopper.withValues(alpha: 0.12),
+            color: _kPrimaryBlue.withValues(alpha: 0.20),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: kCopper.withValues(alpha: 0.4)),
+            border:
+                Border.all(color: _kPrimaryBlue.withValues(alpha: 0.50)),
           ),
           child: Text(
             '📚 $topic',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: kCopper,
-                  fontWeight: FontWeight.w700,
-                ),
+            style: GoogleFonts.rajdhani(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: _kNeonMint,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
       ],
@@ -229,17 +275,33 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
 
   // ── Question card ──────────────────────────────────────────────────────────
 
-  Widget _buildQuestionCard(BuildContext context, DailyChallenge challenge) {
+  Widget _buildQuestionCard(DailyChallenge challenge) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: zamCard(highlighted: true),
+      decoration: BoxDecoration(
+        color: _kDeepNavy,
+        borderRadius: BorderRadius.circular(16),
+        border: Border(
+          left: const BorderSide(color: _kNeonMint, width: 3),
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
+          right: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Text(
         challenge.question,
-        style: const TextStyle(
-          fontFamily: 'Georgia',
-          fontSize: 18,
-          color: kCharcoal,
-          height: 1.55,
+        style: GoogleFonts.inter(
+          fontSize: 17,
+          color: Colors.white,
+          height: 1.6,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -247,7 +309,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
 
   // ── Options list (multipleChoice / trueFalse) ──────────────────────────────
 
-  Widget _buildOptionsList(BuildContext context, DailyChallenge challenge) {
+  Widget _buildOptionsList(DailyChallenge challenge) {
     return Column(
       children: List.generate(challenge.options.length, (i) {
         final selected = _selectedIndex == i;
@@ -255,32 +317,26 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
           onTap: () => setState(() => _selectedIndex = i),
           child: Container(
             margin: const EdgeInsets.only(bottom: 10),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: selected
+                  ? _kPrimaryBlue.withValues(alpha: 0.15)
+                  : _kDeepNavy,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: selected
-                    ? kCopper
-                    : kCopperLight.withValues(alpha: 0.35),
-                width: selected ? 2 : 1,
+                    ? _kNeonMint
+                    : Colors.white.withValues(alpha: 0.10),
+                width: selected ? 1.5 : 1,
               ),
-              boxShadow: selected
-                  ? [
-                      BoxShadow(
-                        color: kCopper.withValues(alpha: 0.18),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      )
-                    ]
-                  : [
-                      BoxShadow(
-                        color: kCopper.withValues(alpha: 0.06),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      )
-                    ],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
@@ -289,28 +345,31 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
                   width: 26,
                   height: 26,
                   decoration: BoxDecoration(
-                    color: selected ? kCopper : Colors.transparent,
+                    color: selected ? _kNeonMint : Colors.transparent,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: selected ? kCopper : kCharcoalLight,
+                      color: selected
+                          ? _kNeonMint
+                          : _kSoftGray.withValues(alpha: 0.4),
                       width: 2,
                     ),
                   ),
                   child: selected
                       ? const Icon(Icons.check,
-                          color: Colors.white, size: 15)
+                          color: _kDeepNavy, size: 15)
                       : null,
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
                     challenge.options[i],
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: kCharcoal,
-                          fontWeight: selected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                        ),
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      color: selected ? Colors.white : _kSoftGray,
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                    ),
                   ),
                 ),
               ],
@@ -323,16 +382,17 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
 
   // ── Numeric input ──────────────────────────────────────────────────────────
 
-  Widget _buildNumericInput(BuildContext context) {
+  Widget _buildNumericInput() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Your answer (ZMW):',
-          style: Theme.of(context)
-              .textTheme
-              .labelLarge
-              ?.copyWith(color: kCharcoal),
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: _kSoftGray,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -342,21 +402,32 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
           ],
+          style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
           decoration: InputDecoration(
             hintText: 'Enter a number…',
+            hintStyle: GoogleFonts.inter(
+                color: _kSoftGray.withValues(alpha: 0.5)),
             prefixText: 'ZMW ',
-            prefixStyle: const TextStyle(
-                color: kCharcoal, fontWeight: FontWeight.w600),
+            prefixStyle: GoogleFonts.inter(
+              color: _kNeonMint,
+              fontWeight: FontWeight.w600,
+            ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: _kDeepNavy,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  BorderSide(color: kCopperLight.withValues(alpha: 0.4)),
+              borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.15)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.15)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: kCopper, width: 2),
+              borderSide:
+                  const BorderSide(color: _kNeonMint, width: 2),
             ),
           ),
           onChanged: (_) => setState(() {}),
@@ -367,21 +438,40 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
 
   // ── Confirm button ─────────────────────────────────────────────────────────
 
-  Widget _buildConfirmButton(BuildContext context, DailyChallenge challenge) {
+  Widget _buildConfirmButton(DailyChallenge challenge) {
     final enabled = _canSubmit(challenge);
-    return ElevatedButton(
-      onPressed: enabled ? () => _submit(challenge) : null,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: kCopper,
-        foregroundColor: Colors.white,
-        disabledBackgroundColor: kCopperLight.withValues(alpha: 0.35),
-        minimumSize: const Size.fromHeight(52),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      child: const Text(
-        'Confirm Answer',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+    return GestureDetector(
+      onTap: enabled ? () => _submit(challenge) : null,
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: enabled
+              ? _kPrimaryBlue
+              : Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: enabled
+              ? [
+                  BoxShadow(
+                    color: _kPrimaryBlue.withValues(alpha: 0.40),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Center(
+          child: Text(
+            'Confirm Answer',
+            style: GoogleFonts.rajdhani(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: enabled
+                  ? Colors.white
+                  : _kSoftGray.withValues(alpha: 0.40),
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -389,13 +479,11 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
   // ── Result card ────────────────────────────────────────────────────────────
 
   Widget _buildResultCard(
-    BuildContext context,
     DailyChallengeState dcState,
     DailyChallenge challenge,
   ) {
     final correct = dcState.isCorrect;
 
-    // Build the correct-answer label for the wrong-answer case.
     final String correctLabel;
     if (challenge.type == ChallengeType.numeric) {
       final n = challenge.correctNumeric;
@@ -408,16 +496,21 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: correct
-            ? kGreen.withValues(alpha: 0.08)
-            : kError.withValues(alpha: 0.08),
+        color: _kDeepNavy,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: correct
-              ? kGreen.withValues(alpha: 0.4)
-              : kError.withValues(alpha: 0.4),
+              ? _kFreshGreen.withValues(alpha: 0.50)
+              : _kError.withValues(alpha: 0.50),
           width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: (correct ? _kFreshGreen : _kError)
+                .withValues(alpha: 0.12),
+            blurRadius: 16,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -432,46 +525,48 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
               Expanded(
                 child: Text(
                   correct ? 'Correct!' : 'Not quite!',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: correct ? kGreen : kError,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: correct ? _kFreshGreen : _kError,
+                  ),
                 ),
               ),
               if (correct)
                 Text(
                   '+$kDailyChallengeXp XP',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: kGold,
-                        fontWeight: FontWeight.w800,
-                      ),
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: _kGold,
+                  ),
                 ),
             ],
           ),
           if (!correct) ...[
             const SizedBox(height: 12),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: kGreen.withValues(alpha: 0.1),
+                color: _kFreshGreen.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: kGreen.withValues(alpha: 0.3)),
+                border: Border.all(
+                    color: _kFreshGreen.withValues(alpha: 0.35)),
               ),
               child: Row(
                 children: [
                   const Icon(Icons.lightbulb_outline,
-                      color: kGreen, size: 16),
+                      color: _kFreshGreen, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Correct answer: $correctLabel',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelMedium
-                          ?.copyWith(
-                              color: kGreen,
-                              fontWeight: FontWeight.w600),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: _kFreshGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -479,31 +574,39 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
             ),
           ],
           const SizedBox(height: 14),
-          const Divider(),
+          Divider(color: Colors.white.withValues(alpha: 0.08)),
           const SizedBox(height: 10),
           Text(
             challenge.explanation,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: kCharcoal, height: 1.5),
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: _kSoftGray,
+              height: 1.6,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ── Already-completed card (previous session today) ────────────────────────
+  // ── Already-completed card (returned from a previous session today) ────────
 
-  Widget _buildAlreadyCompletedCard(
-      BuildContext context, DailyChallenge challenge) {
+  Widget _buildAlreadyCompletedCard(DailyChallenge challenge) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: kGreen.withValues(alpha: 0.08),
+        color: _kDeepNavy,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color: kGreen.withValues(alpha: 0.4), width: 1.5),
+          color: _kFreshGreen.withValues(alpha: 0.50),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _kFreshGreen.withValues(alpha: 0.10),
+            blurRadius: 16,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -512,13 +615,12 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
             children: [
               const Text('✅', style: TextStyle(fontSize: 26)),
               const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Challenge Complete!',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: kGreen,
-                        fontWeight: FontWeight.w700,
-                      ),
+              Text(
+                'Challenge Complete!',
+                style: GoogleFonts.rajdhani(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: _kFreshGreen,
                 ),
               ),
             ],
@@ -526,20 +628,21 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
           const SizedBox(height: 8),
           Text(
             'Come back tomorrow for a new challenge!',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: kCharcoalLight),
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: _kSoftGray,
+            ),
           ),
           const SizedBox(height: 14),
-          const Divider(),
+          Divider(color: Colors.white.withValues(alpha: 0.08)),
           const SizedBox(height: 10),
           Text(
             challenge.explanation,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: kCharcoal, height: 1.5),
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: _kSoftGray,
+              height: 1.6,
+            ),
           ),
         ],
       ),
@@ -549,18 +652,32 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
   // ── Back to Dashboard button ───────────────────────────────────────────────
 
   Widget _buildBackButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => context.go(AppRoutes.home),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: kCopper,
-        foregroundColor: Colors.white,
-        minimumSize: const Size.fromHeight(52),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      child: const Text(
-        'Back to Dashboard',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+    return GestureDetector(
+      onTap: () => context.go(AppRoutes.home),
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: _kPrimaryBlue,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: _kPrimaryBlue.withValues(alpha: 0.40),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'Back to Dashboard',
+            style: GoogleFonts.rajdhani(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
       ),
     );
   }

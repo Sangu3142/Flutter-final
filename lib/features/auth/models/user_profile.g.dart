@@ -35,13 +35,17 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
       lastActiveStr: fields[13] as String,
       totalSavingsZMW: fields[14] as double,
       earnedBadges: (fields[15] as List?)?.cast<String>() ?? [],
+      completedQuizIds: (fields[16] as List?)?.cast<String>() ?? [],
+      totalQuizXP: fields[17] as int? ?? 0,
+      unlockedChapterIds: (fields[18] as List?)?.cast<int>() ?? [],
+      lastSeasonalEventId: fields[19] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserProfile obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(20)
       ..writeByte(0)
       ..write(obj.uid)
       ..writeByte(1)
@@ -73,7 +77,15 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
       ..writeByte(14)
       ..write(obj.totalSavingsZMW)
       ..writeByte(15)
-      ..write(obj.earnedBadges);
+      ..write(obj.earnedBadges)
+      ..writeByte(16)
+      ..write(obj.completedQuizIds)
+      ..writeByte(17)
+      ..write(obj.totalQuizXP)
+      ..writeByte(18)
+      ..write(obj.unlockedChapterIds)
+      ..writeByte(19)
+      ..write(obj.lastSeasonalEventId);
   }
 
   @override

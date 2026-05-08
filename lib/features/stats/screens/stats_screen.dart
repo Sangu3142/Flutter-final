@@ -33,8 +33,8 @@ class StatsScreen extends ConsumerWidget {
       );
     }
 
-    final totalSims = kLevelMeta.values
-        .fold<int>(0, (sum, m) => sum + m.simulations.length);
+    final totalSims =
+        kLevelMeta.values.fold<int>(0, (sum, m) => sum + m.simulations.length);
     final doneSims = kLevelMeta.keys.fold<int>(
       0,
       (sum, id) =>
@@ -129,10 +129,7 @@ class StatsScreen extends ConsumerWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _statCard(context,
-              icon: '🪙',
-              label: 'ZamCoins',
-              value: '$zamCoins',
-              color: kGold),
+              icon: '🪙', label: 'ZamCoins', value: '$zamCoins', color: kGold),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -200,8 +197,7 @@ class StatsScreen extends ConsumerWidget {
                   interval: 200,
                   getTitlesWidget: (v, _) => Text(
                     '${v.toInt()}',
-                    style:
-                        const TextStyle(fontSize: 9, color: kCharcoalLight),
+                    style: const TextStyle(fontSize: 9, color: kCharcoalLight),
                   ),
                 ),
               ),
@@ -223,10 +219,10 @@ class StatsScreen extends ConsumerWidget {
                   },
                 ),
               ),
-              topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false)),
-              rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false)),
+              topTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             ),
             barGroups: List.generate(4, (i) {
               final model = levelState.levels[i + 1];
@@ -273,8 +269,7 @@ class StatsScreen extends ConsumerWidget {
                   interval: 1,
                   getTitlesWidget: (v, _) => Text(
                     '${v.toInt()}',
-                    style:
-                        const TextStyle(fontSize: 9, color: kCharcoalLight),
+                    style: const TextStyle(fontSize: 9, color: kCharcoalLight),
                   ),
                 ),
               ),
@@ -296,19 +291,17 @@ class StatsScreen extends ConsumerWidget {
                   },
                 ),
               ),
-              topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false)),
-              rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false)),
+              topTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             ),
             barGroups: List.generate(4, (i) {
               final levelId = i + 1;
               final meta = kLevelMeta[levelId]!;
               final total = meta.simulations.length.toDouble();
-              final completed = (levelState.levels[levelId]
-                              ?.completedSimulations
-                              .length ??
-                          0)
+              final completed =
+                  (levelState.levels[levelId]?.completedSimulations.length ?? 0)
                       .toDouble()
                       .clamp(0.0, total);
               final remaining = total - completed;

@@ -1,4 +1,4 @@
-﻿/// onboarding_screen.dart
+/// onboarding_screen.dart
 /// Purpose: Three-step onboarding flow that collects the player's income
 ///          category, financial goals (multi-select), and risk appetite.
 ///          Saves preferences via AuthNotifier and routes to the dashboard.
@@ -13,51 +13,32 @@ import 'package:go_router/go_router.dart';
 import 'package:zamwealth_quest/core/router.dart';
 import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
+import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Onboarding Data
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Income category options shown on step 1.
 const List<Map<String, String>> kIncomeCategories = [
-  {'id': 'student', 'label': 'Student 🎓', 'desc': 'Currently studying'},
-  {
-    'id': 'informal_trader',
-    'label': 'Informal Trader 🛒',
-    'desc': 'Market / street business'
-  },
-  {
-    'id': 'civil_servant',
-    'label': 'Civil Servant 🏛️',
-    'desc': 'Government employee'
-  },
-  {'id': 'entrepreneur', 'label': 'Entrepreneur 💼', 'desc': 'Business owner'},
+  {'id': 'student',         'label': 'Student 🎓',          'desc': 'Currently studying'},
+  {'id': 'informal_trader', 'label': 'Informal Trader 🛒',  'desc': 'Market / street business'},
+  {'id': 'civil_servant',   'label': 'Civil Servant 🏛️',    'desc': 'Government employee'},
+  {'id': 'entrepreneur',    'label': 'Entrepreneur 💼',      'desc': 'Business owner'},
 ];
 
-/// Financial goal options shown on step 2 (multi-select).
 const List<Map<String, String>> kFinancialGoals = [
-  {'id': 'buy_land', 'label': 'Buy Land 🌍', 'desc': 'Invest in property'},
-  {
-    'id': 'start_business',
-    'label': 'Start a Business 🏪',
-    'desc': 'Launch my enterprise'
-  },
-  {'id': 'invest', 'label': 'Invest 📈', 'desc': 'Grow my money'},
-  {
-    'id': 'emergency_fund',
-    'label': 'Emergency Fund 🛡️',
-    'desc': 'Build a safety net'
-  },
-  {'id': 'education', 'label': 'Fund Education 📚', 'desc': 'Study costs'},
-  {
-    'id': 'retirement',
-    'label': 'Plan Retirement 🏖️',
-    'desc': 'Long-term security'
-  },
+  {'id': 'buy_land',       'label': 'Buy Land 🌍',          'desc': 'Invest in property'},
+  {'id': 'start_business', 'label': 'Start a Business 🏪',  'desc': 'Launch my enterprise'},
+  {'id': 'invest',         'label': 'Invest 📈',            'desc': 'Grow my money'},
+  {'id': 'emergency_fund', 'label': 'Emergency Fund 🛡️',    'desc': 'Build a safety net'},
+  {'id': 'education',      'label': 'Fund Education 📚',    'desc': 'Study costs'},
+  {'id': 'retirement',     'label': 'Plan Retirement 🏖️',   'desc': 'Long-term security'},
 ];
 
-/// [OnboardingScreen] presents a 3-step paged form (PageView) that collects
-/// the player's financial profile and saves it via [AuthNotifier].
+// ─────────────────────────────────────────────────────────────────────────────
+// Screen
+// ─────────────────────────────────────────────────────────────────────────────
+
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -69,10 +50,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Collected values
   String? _selectedIncomeCategory;
   final Set<String> _selectedGoals = {};
-  double _riskSlider = 1.0; // 0 = low, 1 = medium, 2 = high
+  double _riskSlider = 1.0;
 
   String get _riskLabel {
     if (_riskSlider < 0.5) return 'low';
@@ -92,7 +72,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    // Validate before advancing (intro slides 0-1 need no validation)
     if (_currentPage == 2 && _selectedIncomeCategory == null) {
       _showError('Please select your income category.');
       return;
@@ -121,14 +100,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  /// Saves the collected profile data and navigates to the dashboard.
   Future<void> _finish() async {
     await ref.read(authProvider.notifier).completeOnboarding(
           incomeCategory: _selectedIncomeCategory!,
           financialGoals: _selectedGoals.toList(),
           riskAppetite: _riskLabel,
         );
-
     if (mounted) context.go(AppRoutes.home);
   }
 
@@ -149,56 +126,57 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final user = ref.watch(currentUserProvider);
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: kZamGradient),
+      backgroundColor: Colors.transparent,
+      body: AnimatedGradientBackground(
         child: SafeArea(
           child: Column(
             children: [
-              // ── Progress Indicator ───────────────────────────────────
+              // ── Header + Progress ─────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Welcome, ${user?.name ?? 'Player'}! 👋',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Welcome, ${user?.name ?? 'Player'}!',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: kCharcoal,
+                                letterSpacing: 0.3,
                               ),
-                    ),
-                    if (_currentPage < 2)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            _pageController.animateToPage(
-                              2,
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          child: Text(
-                            'Skip intro →',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.8),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                         ),
-                      ),
+                        if (_currentPage < 2)
+                          TextButton(
+                            onPressed: () {
+                              _pageController.animateToPage(
+                                2,
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: kNeonMint,
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text('Skip →'),
+                          ),
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       _currentPage < 2
                           ? 'Swipe or tap Next to continue'
                           : 'Step ${_currentPage - 1} of 3 — Tell us about yourself',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.8),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: kCharcoalLight,
                           ),
                     ),
                     const SizedBox(height: 14),
-                    // Animated page dot indicators
+                    // Page dot indicators
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(5, (i) {
@@ -210,8 +188,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           height: 8,
                           decoration: BoxDecoration(
                             color: isActive
-                                ? kGold
-                                : Colors.white.withValues(alpha: 0.35),
+                                ? kNeonMint
+                                : kCharcoalLight.withValues(alpha: 0.35),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         );
@@ -223,7 +201,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
               const SizedBox(height: 20),
 
-              // ── PageView ─────────────────────────────────────────────
+              // ── PageView ──────────────────────────────────────────────
               Expanded(
                 child: PageView(
                   controller: _pageController,
@@ -241,7 +219,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
 
-              // ── Navigation Buttons ───────────────────────────────────
+              // ── Navigation Buttons ────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
                 child: Row(
@@ -250,12 +228,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: _prevPage,
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                                color: Colors.white, width: 1.5),
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Back'),
+                          child: const Text('BACK'),
                         ),
                       ),
                     if (_currentPage > 0) const SizedBox(width: 12),
@@ -264,11 +237,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       child: ElevatedButton(
                         onPressed: _nextPage,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: kGold,
-                          foregroundColor: kCharcoal,
+                          backgroundColor: _currentPage >= 2 ? kNeonMint : kGold,
+                          foregroundColor: kCoreNavy,
                         ),
                         child: Text(
-                          _currentPage < 4 ? 'Next →' : 'Start Playing! 🚀',
+                          _currentPage < 4 ? 'NEXT →' : 'START PLAYING 🚀',
                         ),
                       ),
                     ),
@@ -282,7 +255,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Slide 0: Welcome ────────────────────────────────────────────────────
+  // ── Slide 0: Welcome ──────────────────────────────────────────────────────
 
   Widget _buildSlide0() {
     return SingleChildScrollView(
@@ -295,26 +268,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Text(
             'Welcome to ZamWealth Quest',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  color: kCharcoal,
+                  letterSpacing: 0.3,
                 ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
             'The fun way to learn real financial skills — designed for Zambia.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.8),
-                ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoalLight),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          Container(
+          GlassCard(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-            ),
             child: Column(
               children: [
                 _bulletRow('🪙', 'Earn ZamCoins as you learn'),
@@ -330,7 +297,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Slide 1: How It Works ────────────────────────────────────────────────
+  // ── Slide 1: How It Works ─────────────────────────────────────────────────
 
   Widget _buildSlide1() {
     return SingleChildScrollView(
@@ -343,39 +310,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Text(
             'How ZamWealth Quest Works',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  color: kCharcoal,
+                  letterSpacing: 0.3,
                 ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
             'Complete simulations, earn XP, and climb the ranks.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.8),
-                ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoalLight),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          Container(
+          GlassCard(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-            ),
             child: Column(
               children: [
-                _featureRow(kCopper, '⚔️', 'Rank Up',
-                    'Earn XP to rise from Novice to Legend'),
+                _featureRow(kNeonMint, '⚔️', 'Rank Up', 'Earn XP to rise from Novice to Legend'),
                 const SizedBox(height: 14),
-                _featureRow(kGold, '🪙', 'ZamCoins',
-                    'Spend coins to unlock premium levels'),
+                _featureRow(kGold, '🪙', 'ZamCoins', 'Spend coins to unlock premium levels'),
                 const SizedBox(height: 14),
-                _featureRow(kGreen, '📊', 'Simulations',
-                    'Practice budgeting, saving, investing & more'),
+                _featureRow(kGreen, '📊', 'Simulations', 'Practice budgeting, saving, investing & more'),
                 const SizedBox(height: 14),
-                _featureRow(const Color(0xFF6B4EFF), '🏅', 'Badges',
-                    'Collect achievements as you master each topic'),
+                _featureRow(kPrimaryBlue, '🏅', 'Badges', 'Collect achievements as you master each topic'),
               ],
             ),
           ),
@@ -392,29 +349,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         Expanded(
           child: Text(
             text,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
           ),
         ),
       ],
     );
   }
 
-  Widget _featureRow(
-      Color bgColor, String emoji, String title, String subtitle) {
+  Widget _featureRow(Color accent, String emoji, String title, String subtitle) {
     return Row(
       children: [
         Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: bgColor.withValues(alpha: 0.8),
+            color: accent.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: accent.withValues(alpha: 0.40)),
           ),
-          child: Center(
-            child: Text(emoji, style: const TextStyle(fontSize: 20)),
-          ),
+          child: Center(child: Text(emoji, style: const TextStyle(fontSize: 20))),
         ),
         const SizedBox(width: 14),
         Expanded(
@@ -423,16 +376,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: accent,
+                      fontWeight: FontWeight.w700,
                     ),
               ),
               Text(
                 subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.75),
-                    ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: kCharcoalLight),
               ),
             ],
           ),
@@ -441,7 +392,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 1: Income Category ─────────────────────────────────────────────
+  // ── Step 1: Income Category ───────────────────────────────────────────────
 
   Widget _buildStep1() {
     return SingleChildScrollView(
@@ -451,17 +402,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           Text(
             'What best describes you?',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: kCharcoal),
           ),
           const SizedBox(height: 4),
           Text(
-            'We\'ll personalise your experience based on your income type.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.75),
-                ),
+            "We'll personalise your experience based on your income type.",
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: kCharcoalLight),
           ),
           const SizedBox(height: 16),
           ...kIncomeCategories.map((cat) {
@@ -474,14 +420,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? kGold.withValues(alpha: 0.2)
-                      : Colors.white.withValues(alpha: 0.1),
+                      ? kNeonMint.withValues(alpha: 0.10)
+                      : kDeepNavy.withValues(alpha: 0.60),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isSelected
-                        ? kGold
-                        : Colors.white.withValues(alpha: 0.3),
-                    width: isSelected ? 2 : 1,
+                    color: isSelected ? kNeonMint : Colors.white.withValues(alpha: 0.12),
+                    width: isSelected ? 1.5 : 1,
                   ),
                 ),
                 child: Row(
@@ -492,13 +436,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isSelected ? kGold : Colors.white,
+                          color: isSelected ? kNeonMint : kCharcoalLight,
                           width: 2,
                         ),
-                        color: isSelected ? kGold : Colors.transparent,
+                        color: isSelected ? kNeonMint : Colors.transparent,
                       ),
                       child: isSelected
-                          ? const Icon(Icons.check, size: 14, color: kCharcoal)
+                          ? const Icon(Icons.check, size: 14, color: kCoreNavy)
                           : null,
                     ),
                     const SizedBox(width: 14),
@@ -507,18 +451,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       children: [
                         Text(
                           cat['label']!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(color: Colors.white),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: isSelected ? kNeonMint : kCharcoal,
+                              ),
                         ),
                         Text(
                           cat['desc']!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.7)),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: kCharcoalLight,
+                              ),
                         ),
                       ],
                     ),
@@ -532,7 +473,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 2: Financial Goals (multi-select) ──────────────────────────────
+  // ── Step 2: Financial Goals ───────────────────────────────────────────────
 
   Widget _buildStep2() {
     return SingleChildScrollView(
@@ -542,17 +483,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           Text(
             'What are your financial goals?',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: kCharcoal),
           ),
           const SizedBox(height: 4),
           Text(
-            'Select all that apply — we\'ll tailor your simulations.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.75),
-                ),
+            "Select all that apply — we'll tailor your simulations.",
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: kCharcoalLight),
           ),
           const SizedBox(height: 16),
           GridView.count(
@@ -579,14 +515,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? kGold.withValues(alpha: 0.2)
-                        : Colors.white.withValues(alpha: 0.1),
+                        ? kNeonMint.withValues(alpha: 0.10)
+                        : kDeepNavy.withValues(alpha: 0.60),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isSelected
-                          ? kGold
-                          : Colors.white.withValues(alpha: 0.3),
-                      width: isSelected ? 2 : 1,
+                      color: isSelected ? kNeonMint : Colors.white.withValues(alpha: 0.12),
+                      width: isSelected ? 1.5 : 1,
                     ),
                   ),
                   child: Column(
@@ -596,26 +530,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            goal['label']!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          Expanded(
+                            child: Text(
+                              goal['label']!,
+                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: isSelected ? kNeonMint : kCharcoal,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           if (isSelected)
-                            const Icon(Icons.check_circle,
-                                size: 16, color: kGold),
+                            const Icon(Icons.check_circle, size: 16, color: kNeonMint),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
                         goal['desc']!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: kCharcoalLight,
                               fontSize: 10,
                             ),
                       ),
@@ -630,7 +563,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 3: Risk Appetite ───────────────────────────────────────────────
+  // ── Step 3: Risk Appetite ─────────────────────────────────────────────────
 
   Widget _buildStep3() {
     return SingleChildScrollView(
@@ -640,45 +573,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           Text(
             'What is your risk appetite?',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: kCharcoal),
           ),
           const SizedBox(height: 4),
           Text(
             'How comfortable are you with investment risk?',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.75),
-                ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: kCharcoalLight),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
 
-          // Risk level indicator
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-              border:
-                  Border.all(color: kGold.withValues(alpha: 0.5), width: 1.5),
-            ),
+          GlassCard(
+            highlighted: true,
             child: Column(
               children: [
                 Text(
                   _riskLabel.toUpperCase(),
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         color: kGold,
-                        fontWeight: FontWeight.w800,
                         letterSpacing: 4,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   _riskDescription,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                      ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoalLight),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -687,13 +605,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
           const SizedBox(height: 28),
 
-          // Slider
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: kGold,
-              inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+              inactiveTrackColor: kCharcoalLight.withValues(alpha: 0.30),
               thumbColor: kGold,
-              overlayColor: kGold.withValues(alpha: 0.2),
+              overlayColor: kGold.withValues(alpha: 0.20),
               trackHeight: 6,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
             ),
@@ -708,7 +625,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
           const SizedBox(height: 4),
 
-          // Labels under slider
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -718,37 +634,35 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ],
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
 
           // Summary card
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
+          GlassCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Your Profile Summary',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: kGold,
+                        color: kNeonMint,
                         fontWeight: FontWeight.w700,
                       ),
                 ),
                 const SizedBox(height: 10),
                 _summaryRow(
-                    'Income Type',
-                    kIncomeCategories.firstWhere(
-                      (c) => c['id'] == _selectedIncomeCategory,
-                      orElse: () => {'label': '—'},
-                    )['label']!),
+                  'Income Type',
+                  kIncomeCategories.firstWhere(
+                    (c) => c['id'] == _selectedIncomeCategory,
+                    orElse: () => {'label': '—'},
+                  )['label']!,
+                ),
                 _summaryRow('Goals', '${_selectedGoals.length} selected'),
                 _summaryRow('Risk', _riskLabel.toUpperCase()),
               ],
             ),
           ),
+
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -759,7 +673,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Text(
       label,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: isActive ? kGold : Colors.white.withValues(alpha: 0.6),
+            color: isActive ? kGold : kCharcoalLight,
             fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
           ),
     );
@@ -772,14 +686,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           Text(
             '$key: ',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.65),
-                ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: kCharcoalLight),
           ),
           Text(
             value,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
+                  color: kCharcoal,
                   fontWeight: FontWeight.w600,
                 ),
           ),

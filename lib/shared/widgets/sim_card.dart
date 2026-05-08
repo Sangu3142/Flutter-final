@@ -133,6 +133,15 @@ const Map<String, SimCardMeta> kSimMeta = {
     emoji: '📋',
     xpLabel: '+200 XP',
   ),
+
+  // Quiz Challenge (Level 1)
+  kSimQuizChallenge: SimCardMeta(
+    title: 'Quiz Challenge',
+    description:
+        'Test your Zambia financial literacy — NAPSA, VAT, mobile money, savings & more.',
+    emoji: '🎯',
+    xpLabel: '+40 XP',
+  ),
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
