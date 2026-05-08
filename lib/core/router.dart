@@ -1,6 +1,6 @@
 /// router.dart
 /// Purpose: Defines the entire GoRouter navigation graph — routes, redirects,
-///          and the shell (bottom navigation scaffold).
+///          transitions, and the shell (bottom navigation scaffold).
 /// Reads from: authProvider (for redirect logic)
 /// Writes to: nothing
 /// Navigation: ALL screen routes are declared here
@@ -9,6 +9,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
 import 'package:zamwealth_quest/features/auth/screens/splash_screen.dart';
 import 'package:zamwealth_quest/features/daily_challenge/screens/daily_challenge_screen.dart';
@@ -23,7 +24,11 @@ import 'package:zamwealth_quest/features/profile/screens/profile_screen.dart';
 import 'package:zamwealth_quest/features/profile/screens/dev_screen.dart';
 import 'package:zamwealth_quest/features/leaderboard/screens/leaderboard_screen.dart';
 import 'package:zamwealth_quest/features/badges/screens/badges_screen.dart';
+import 'package:zamwealth_quest/features/quiz/screens/quiz_screen.dart';
+import 'package:zamwealth_quest/features/seasonal/screens/seasonal_event_screen.dart';
 import 'package:zamwealth_quest/features/stats/screens/stats_screen.dart';
+import 'package:zamwealth_quest/features/story/screens/story_chapter_screen.dart';
+import 'package:zamwealth_quest/features/story/screens/story_map_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Route Paths
@@ -56,10 +61,46 @@ class AppRoutes {
 
   // Stats screen (full screen, outside shell)
   static const String stats = '/stats';
+
+  // Engagement layer (full screen, outside shell)
+  static const String quiz           = '/quiz';
+  static const String story          = '/story';
+  static const String storyChapter   = '/story/chapter/:chapterId';
+  static const String seasonalEvent  = '/seasonal-event';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Router Notifier — tells GoRouter to re-evaluate redirects on auth changes
+// Transition Helper
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Builds a [CustomTransitionPage] that fades and slides the new screen up
+/// from a 5 % offset over 350 ms with an ease-out curve.
+CustomTransitionPage<void> _fadeSlidePage({
+  required LocalKey pageKey,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 350),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      final slide = Tween<Offset>(
+        begin: const Offset(0.0, 0.05),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+
+      return FadeTransition(
+        opacity: fade,
+        child: SlideTransition(position: slide, child: child),
+      );
+    },
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Router Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _RouterNotifier extends ChangeNotifier {
@@ -77,8 +118,6 @@ final _routerNotifierProvider = ChangeNotifierProvider<_RouterNotifier>((ref) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Provides the [GoRouter] instance, wired to [authProvider] for redirects.
-/// Uses [refreshListenable] so the router is created once and never recreated —
-/// only the redirect is re-evaluated when auth state changes.
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.read(_routerNotifierProvider);
 
@@ -94,102 +133,166 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuth = authState.isAuthenticated;
       final doneOnboarding = authState.hasCompletedOnboarding;
 
-      // Allow splash through unconditionally
       if (location == AppRoutes.splash) return null;
-
-      // Allow register screen without auth
       if (location == AppRoutes.register) return null;
 
-      // If not authenticated, only allow login
       if (!isAuth) {
         if (location == AppRoutes.login) return null;
         return AppRoutes.login;
       }
 
-      // Authenticated but onboarding not done → send to onboarding
       if (!doneOnboarding) {
         if (location == AppRoutes.onboarding) return null;
         return AppRoutes.onboarding;
       }
 
-      // Authenticated + onboarding done: redirect login/onboarding → home
       if (location == AppRoutes.login || location == AppRoutes.onboarding) {
         return AppRoutes.home;
       }
 
-      return null; // allow navigation
+      return null;
     },
 
     routes: [
       // ── Splash ────────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.splash,
-        builder: (_, __) => const SplashScreen(),
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const SplashScreen(),
+        ),
       ),
 
       // ── Login ─────────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.login,
-        builder: (_, __) => const LoginScreen(),
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const LoginScreen(),
+        ),
       ),
 
       // ── Register ──────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.register,
-        builder: (_, __) => const RegisterScreen(),
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const RegisterScreen(),
+        ),
       ),
 
       // ── Onboarding ────────────────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (_, __) => const OnboardingScreen(),
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const OnboardingScreen(),
+        ),
       ),
 
-      // ── Level Detail (outside shell — full screen) ─────────────────────
+      // ── Level Detail (outside shell) ───────────────────────────────────────
       GoRoute(
         path: '/levels/:levelId',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final levelId =
               int.tryParse(state.pathParameters['levelId'] ?? '1') ?? 1;
-          return LevelScreen(levelId: levelId);
+          return _fadeSlidePage(
+            pageKey: state.pageKey,
+            child: LevelScreen(levelId: levelId),
+          );
         },
       ),
 
-      // ── Payment (outside shell — full screen) ─────────────────────────
+      // ── Payment (outside shell) ────────────────────────────────────────────
       GoRoute(
         path: '/payment/:levelId',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final levelId =
               int.tryParse(state.pathParameters['levelId'] ?? '2') ?? 2;
-          return PaymentScreen(levelId: levelId);
+          return _fadeSlidePage(
+            pageKey: state.pageKey,
+            child: PaymentScreen(levelId: levelId),
+          );
         },
       ),
 
-      // ── Dev Screen (outside shell — full screen) ───────────────────────
+      // ── Dev Screen (outside shell) ─────────────────────────────────────────
       GoRoute(
         path: AppRoutes.dev,
-        builder: (_, __) => const DevScreen(),
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const DevScreen(),
+        ),
       ),
 
-      // ── Badges Screen (outside shell — full screen) ────────────────────
+      // ── Badges Screen (outside shell) ──────────────────────────────────────
       GoRoute(
         path: AppRoutes.badges,
-        builder: (_, __) => const BadgesScreen(),
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const BadgesScreen(),
+        ),
       ),
 
-      // ── Daily Challenge (outside shell — full screen) ──────────────────
+      // ── Daily Challenge (outside shell) ────────────────────────────────────
       GoRoute(
         path: AppRoutes.dailyChallenge,
-        builder: (_, __) => const DailyChallengeScreen(),
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const DailyChallengeScreen(),
+        ),
       ),
 
-      // ── Stats (outside shell — full screen) ────────────────────────────
+      // ── Stats (outside shell) ──────────────────────────────────────────────
       GoRoute(
         path: AppRoutes.stats,
-        builder: (_, __) => const StatsScreen(),
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const StatsScreen(),
+        ),
       ),
 
-      // ── Shell — Bottom Navigation Scaffold ─────────────────────────────
+      // ── Quiz (outside shell) ───────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.quiz,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const QuizScreen(),
+        ),
+      ),
+
+      // ── Story Map (outside shell) ──────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.story,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const StoryMapScreen(),
+        ),
+      ),
+
+      // ── Story Chapter (outside shell) ──────────────────────────────────────
+      GoRoute(
+        path: '/story/chapter/:chapterId',
+        pageBuilder: (context, state) {
+          final chapterId =
+              int.tryParse(state.pathParameters['chapterId'] ?? '1') ?? 1;
+          return _fadeSlidePage(
+            pageKey: state.pageKey,
+            child: StoryChapterScreen(chapterId: chapterId),
+          );
+        },
+      ),
+
+      // ── Seasonal Event (outside shell) ─────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.seasonalEvent,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const SeasonalEventScreen(),
+        ),
+      ),
+
+      // ── Shell — Bottom Navigation Scaffold ─────────────────────────────────
       ShellRoute(
         builder: (context, state, child) {
           return _MainScaffold(location: state.matchedLocation, child: child);
@@ -197,19 +300,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            builder: (_, __) => const DashboardScreen(),
+            pageBuilder: (context, state) => _fadeSlidePage(
+              pageKey: state.pageKey,
+              child: const DashboardScreen(),
+            ),
           ),
           GoRoute(
             path: AppRoutes.levels,
-            builder: (_, __) => const LevelMapScreen(),
+            pageBuilder: (context, state) => _fadeSlidePage(
+              pageKey: state.pageKey,
+              child: const LevelMapScreen(),
+            ),
           ),
           GoRoute(
             path: AppRoutes.profile,
-            builder: (_, __) => const ProfileScreen(),
+            pageBuilder: (context, state) => _fadeSlidePage(
+              pageKey: state.pageKey,
+              child: const ProfileScreen(),
+            ),
           ),
           GoRoute(
             path: AppRoutes.leaderboard,
-            builder: (_, __) => const LeaderboardScreen(),
+            pageBuilder: (context, state) => _fadeSlidePage(
+              pageKey: state.pageKey,
+              child: const LeaderboardScreen(),
+            ),
           ),
         ],
       ),
@@ -221,20 +336,17 @@ final routerProvider = Provider<GoRouter>((ref) {
 // Main Scaffold (Shell)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// The persistent shell widget that wraps all bottom-nav tabs.
-/// Manages which tab is selected based on the current route location.
 class _MainScaffold extends StatelessWidget {
   const _MainScaffold({required this.child, required this.location});
 
   final Widget child;
   final String location;
 
-  /// Returns the index of the currently active bottom-nav tab.
   int get _currentIndex {
     if (location.startsWith('/levels')) return 1;
     if (location.startsWith('/profile')) return 2;
     if (location.startsWith('/leaderboard')) return 3;
-    return 0; // home
+    return 0;
   }
 
   void _onTap(BuildContext context, int index) {
@@ -257,10 +369,45 @@ class _MainScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: child,
-      bottomNavigationBar: BottomNavigationBar(
+      backgroundColor: Colors.transparent,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        child: KeyedSubtree(key: ValueKey(location), child: child),
+      ),
+      bottomNavigationBar: _NavBar(
         currentIndex: _currentIndex,
         onTap: (i) => _onTap(context, i),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Nav Bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _NavBar extends StatelessWidget {
+  const _NavBar({required this.currentIndex, required this.onTap});
+
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1628),
+        border: Border(
+          top: BorderSide(color: kNeonMint.withValues(alpha: 0.25), width: 1),
+        ),
+      ),
+      child: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: onTap,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),

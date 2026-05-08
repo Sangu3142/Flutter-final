@@ -37,9 +37,15 @@ class UserProfile extends HiveObject {
     String? lastActiveStr,
     this.totalSavingsZMW = 0.0,
     List<String>? earnedBadges,
+    List<String>? completedQuizIds,
+    this.totalQuizXP = 0,
+    List<int>? unlockedChapterIds,
+    this.lastSeasonalEventId,
   })  : unlockedLevels = unlockedLevels ?? [1],
         badges = badges ?? [],
         earnedBadges = earnedBadges ?? [],
+        completedQuizIds = completedQuizIds ?? [],
+        unlockedChapterIds = unlockedChapterIds ?? [],
         lastActiveStr = lastActiveStr ?? DateTime.now().toIso8601String();
 
   // ── Identity ──────────────────────────────────────────────────────────────
@@ -117,6 +123,22 @@ class UserProfile extends HiveObject {
   @HiveField(15)
   List<String> earnedBadges;
 
+  /// Quiz question IDs the player has answered (for de-duplication).
+  @HiveField(16)
+  List<String> completedQuizIds;
+
+  /// Total XP earned specifically from the Financial Quiz feature.
+  @HiveField(17)
+  int totalQuizXP;
+
+  /// Story chapter IDs unlocked in The Kwacha Chronicles.
+  @HiveField(18)
+  List<int> unlockedChapterIds;
+
+  /// ID of the last seasonal event the player completed (e.g. 'se_dec_2025').
+  @HiveField(19)
+  String? lastSeasonalEventId;
+
   // ── Computed Accessors ────────────────────────────────────────────────────
 
   /// Returns [lastActiveStr] as a [DateTime] object.
@@ -156,6 +178,32 @@ class UserProfile extends HiveObject {
     if (!unlockedLevels.contains(levelId)) {
       unlockedLevels = [...unlockedLevels, levelId];
     }
+  }
+
+  /// Awards quiz XP and records the question ID.
+  void addQuizXp(int amount, String questionId) {
+    xp += amount;
+    totalQuizXP += amount;
+    if (!completedQuizIds.contains(questionId)) {
+      completedQuizIds.add(questionId);
+    }
+  }
+
+  /// Records an unlocked story chapter.
+  void unlockChapter(int chapterId) {
+    if (!unlockedChapterIds.contains(chapterId)) {
+      unlockedChapterIds.add(chapterId);
+    }
+  }
+
+  /// Marks a seasonal event as completed for the current year/month.
+  void completeSeasonalEvent(String eventId, int year, int month) {
+    lastSeasonalEventId = '${eventId}_${year}_$month';
+  }
+
+  /// Returns true if [eventId] was completed this calendar month.
+  bool hasCompletedSeasonalEvent(String eventId, int year, int month) {
+    return lastSeasonalEventId == '${eventId}_${year}_$month';
   }
 
   @override

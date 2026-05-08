@@ -200,7 +200,8 @@ class _DebtSimulationState extends State<DebtSimulation> {
                       decoration: BoxDecoration(
                         color: kGreen.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: kGreen.withValues(alpha: 0.4)),
+                        border:
+                            Border.all(color: kGreen.withValues(alpha: 0.4)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

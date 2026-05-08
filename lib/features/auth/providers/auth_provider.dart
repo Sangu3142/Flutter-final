@@ -270,14 +270,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  // ── Logout ────────────────────────────────────────────────────────────────
+  // ── Sign Out ──────────────────────────────────────────────────────────────
 
-  /// Clears the session from Hive and resets state to unauthenticated.
-  Future<void> logout() async {
+  /// Clears the persisted session and resets state to unauthenticated.
+  ///
+  /// Does nothing else. No navigation is performed here — the calling screen
+  /// holds the router reference and drives navigation explicitly, with
+  /// GoRouter's redirect guard acting as a safety net.
+  Future<void> signOut() async {
     try {
-      await _sessionBox.delete('currentUid');
+      await _sessionBox.clear();
     } catch (_) {}
-    state = const AuthState(currentUser: null);
+    state = const AuthState();
   }
 
   // ── Dev Utilities ─────────────────────────────────────────────────────────

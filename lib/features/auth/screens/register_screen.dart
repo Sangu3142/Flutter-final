@@ -1,4 +1,4 @@
-﻿/// register_screen.dart
+/// register_screen.dart
 /// Purpose: Registration screen — collects name, username, and password,
 ///          creates a new UserProfile in Hive, then routes to onboarding.
 /// Reads from: authProvider
@@ -12,9 +12,8 @@ import 'package:go_router/go_router.dart';
 import 'package:zamwealth_quest/core/router.dart';
 import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
+import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
 
-/// [RegisterScreen] collects the minimum required info to create an account
-/// and delegates all storage logic to [AuthNotifier.register].
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -40,7 +39,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
-  /// Validates and submits the registration form.
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
@@ -50,8 +48,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           password: _passwordCtrl.text,
         );
 
-    // On success, GoRouter redirect sends user to /onboarding automatically.
-    // On failure, error is shown via the listener below.
     if (success && mounted) {
       context.go(AppRoutes.onboarding);
     }
@@ -61,7 +57,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
-    // Show error SnackBar on registration failure
     ref.listen<AuthState>(authProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -74,47 +69,50 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: kZamGradient),
+      backgroundColor: Colors.transparent,
+      body: AnimatedGradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
               children: [
-                // ── Back Button ──────────────────────────────────────────
+                // ── Back Button ───────────────────────────────────────────
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     onPressed: () => context.go(AppRoutes.login),
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    icon: Icon(
+                      Icons.arrow_back_ios,
+                      color: kCharcoal.withValues(alpha: 0.80),
+                      size: 20,
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
 
-                // ── Header ───────────────────────────────────────────────
+                // ── Header ────────────────────────────────────────────────
                 Text(
-                  'Join ZamWealth Quest',
+                  'Join the Quest',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
+                        color: kCharcoal,
+                        letterSpacing: 0.5,
                       ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Start your financial literacy adventure today',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: kCharcoalLight,
                       ),
                   textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 28),
 
-                // ── Form Card ────────────────────────────────────────────
-                Container(
+                // ── Form Card ─────────────────────────────────────────────
+                GlassCard(
                   padding: const EdgeInsets.all(24),
-                  decoration: zamCard(radius: 20),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -123,10 +121,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         // Display Name
                         TextFormField(
                           controller: _nameCtrl,
-                          decoration: const InputDecoration(
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
+                          decoration: InputDecoration(
                             labelText: 'Your Name',
-                            prefixIcon: Icon(Icons.badge_outlined),
                             hintText: 'e.g. Chanda',
+                            prefixIcon: Icon(Icons.badge_outlined, color: kNeonMint.withValues(alpha: 0.70), size: 20),
                           ),
                           textInputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.words,
@@ -146,10 +145,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         // Username
                         TextFormField(
                           controller: _usernameCtrl,
-                          decoration: const InputDecoration(
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
+                          decoration: InputDecoration(
                             labelText: 'Username',
-                            prefixIcon: Icon(Icons.alternate_email),
                             hintText: 'e.g. chanda_mw (min 3 chars)',
+                            prefixIcon: Icon(Icons.alternate_email, color: kNeonMint.withValues(alpha: 0.70), size: 20),
                           ),
                           textInputAction: TextInputAction.next,
                           autocorrect: false,
@@ -160,9 +160,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             if (v.trim().length < 3) {
                               return 'Username must be at least 3 characters';
                             }
-                            // Only allow alphanumeric and underscore
-                            if (!RegExp(r'^[a-zA-Z0-9_]+$')
-                                .hasMatch(v.trim())) {
+                            if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(v.trim())) {
                               return 'Only letters, numbers, and underscores';
                             }
                             return null;
@@ -175,29 +173,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         TextFormField(
                           controller: _passwordCtrl,
                           obscureText: _obscurePassword,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
                             hintText: 'Min 6 characters',
+                            prefixIcon: Icon(Icons.lock_outline, color: kNeonMint.withValues(alpha: 0.70), size: 20),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
+                                _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                color: kCharcoalLight,
+                                size: 20,
                               ),
-                              onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
+                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                             ),
                           ),
                           textInputAction: TextInputAction.next,
                           validator: (v) {
-                            if (v == null || v.isEmpty) {
-                              return 'Please create a password';
-                            }
-                            if (v.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
+                            if (v == null || v.isEmpty) return 'Please create a password';
+                            if (v.length < 6) return 'Password must be at least 6 characters';
                             return null;
                           },
                         ),
@@ -208,33 +201,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         TextFormField(
                           controller: _confirmCtrl,
                           obscureText: _obscureConfirm,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
                           decoration: InputDecoration(
                             labelText: 'Confirm Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: Icon(Icons.lock_outline, color: kNeonMint.withValues(alpha: 0.70), size: 20),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscureConfirm
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
+                                _obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                color: kCharcoalLight,
+                                size: 20,
                               ),
-                              onPressed: () => setState(
-                                () => _obscureConfirm = !_obscureConfirm,
-                              ),
+                              onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
                             ),
                           ),
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _submit(),
                           validator: (v) {
-                            if (v != _passwordCtrl.text) {
-                              return 'Passwords do not match';
-                            }
+                            if (v != _passwordCtrl.text) return 'Passwords do not match';
                             return null;
                           },
                         ),
 
                         const SizedBox(height: 28),
 
-                        // Create Account button
                         ElevatedButton(
                           onPressed: authState.isLoading ? null : _submit,
                           child: authState.isLoading
@@ -242,16 +231,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   height: 22,
                                   width: 22,
                                   child: CircularProgressIndicator(
-                                    color: Colors.white,
+                                    color: kCoreNavy,
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Text('Create Account'),
+                              : const Text('CREATE ACCOUNT'),
                         ),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
 
-                        // Already have account
                         TextButton(
                           onPressed: () => context.go(AppRoutes.login),
                           child: const Text('Already have an account? Sign In'),
@@ -263,7 +251,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 const SizedBox(height: 24),
 
-                // ── Benefits chips ───────────────────────────────────────
+                // ── Benefits Chips ────────────────────────────────────────
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -275,6 +263,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     _benefitChip('🏆 Earn badges'),
                   ],
                 ),
+
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -285,16 +275,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Widget _benefitChip(String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: kNeonMint.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        border: Border.all(color: kNeonMint.withValues(alpha: 0.25)),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
+              color: kCharcoal,
               fontWeight: FontWeight.w500,
             ),
       ),
