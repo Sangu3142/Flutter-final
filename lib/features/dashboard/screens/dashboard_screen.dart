@@ -16,6 +16,7 @@ import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/core/router.dart';
 import 'package:zamwealth_quest/core/tips.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
+import 'package:zamwealth_quest/features/daily_challenge/models/challenge.dart';
 import 'package:zamwealth_quest/features/daily_challenge/providers/daily_challenge_provider.dart';
 import 'package:zamwealth_quest/features/dashboard/providers/dashboard_provider.dart';
 import 'package:zamwealth_quest/features/seasonal/providers/seasonal_event_provider.dart';
@@ -62,6 +63,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       GlobalKey<SparkleOverlayState>();
 
   bool _budgetExpanded = false;
+  bool _challengeDialogShown = false;
 
   @override
   void initState() {
@@ -81,6 +83,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     _streakScale = Tween<double>(begin: 1.0, end: 1.10).animate(
       CurvedAnimation(parent: _streakCtrl, curve: Curves.easeInOut),
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybShowChallengeDialog());
   }
 
   @override
@@ -90,12 +94,158 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     super.dispose();
   }
 
+  void _maybShowChallengeDialog() {
+    if (_challengeDialogShown || !mounted) return;
+    final dcState = ref.read(dailyChallengeProvider);
+    if (dcState.todaysChallenge == null ||
+        (dcState.record?.completedToday ?? false) ||
+        dcState.isLoading) {
+      return;
+    }
+
+    // Persist shown-state in Hive so navigating away and back doesn't re-trigger.
+    final uid = ref.read(currentUserProvider)?.uid ?? '';
+    final now = DateTime.now();
+    final todayStr =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final settingsBox = Hive.box(kSettingsBox);
+    if (settingsBox.get('dc_dialog_shown_$uid') == todayStr) return;
+
+    _challengeDialogShown = true;
+    settingsBox.put('dc_dialog_shown_$uid', todayStr);
+    _showChallengeDialog(dcState.todaysChallenge!);
+  }
+
+  void _showChallengeDialog(DailyChallenge challenge) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: _kDeepNavy,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text('📅', style: TextStyle(fontSize: 22)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'DAILY CHALLENGE',
+                      style: GoogleFonts.orbitron(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: _kNeonMint,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: _kSoftGray, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _kPrimaryBlue.withValues(alpha: 0.20),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: _kPrimaryBlue.withValues(alpha: 0.50)),
+                ),
+                child: Text(
+                  '📚 ${challenge.topic}',
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: _kNeonMint,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                challenge.question,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  color: Colors.white,
+                  height: 1.55,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.push(AppRoutes.dailyChallenge);
+                },
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1A73E8), Color(0xFF36ECDE)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _kNeonMint.withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Take Today's Challenge  →",
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    'Remind me later',
+                    style: GoogleFonts.inter(fontSize: 13, color: _kSoftGray),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Fire sparkle whenever XP increases
     ref.listen<DashboardState?>(dashboardProvider, (prev, next) {
       if (prev != null && next != null && next.xp > prev.xp) {
         _xpSparkleKey.currentState?.trigger();
+      }
+    });
+
+    // Show challenge dialog once the provider finishes loading.
+    ref.listen<DailyChallengeState>(dailyChallengeProvider, (prev, next) {
+      if (!next.isLoading && next.todaysChallenge != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _maybShowChallengeDialog();
+        });
       }
     });
 
@@ -443,28 +593,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           // XP bar with glow and sparkle
           SparkleOverlay(
             key: _xpSparkleKey,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: _kNeonMint.withValues(alpha: 0.50),
-                    blurRadius: 12,
-                    spreadRadius: 2,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: AnimatedBuilder(
+                animation: _xpAnim,
+                builder: (_, __) => CustomPaint(
+                  painter: _XpBarPainter(
+                    progress: dash.progressPercent * _xpAnim.value,
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: AnimatedBuilder(
-                  animation: _xpAnim,
-                  builder: (_, __) => CustomPaint(
-                    painter: _XpBarPainter(
-                      progress: dash.progressPercent * _xpAnim.value,
-                    ),
-                    child: const SizedBox(
-                        width: double.infinity, height: 16),
-                  ),
+                  child: const SizedBox(
+                      width: double.infinity, height: 16),
                 ),
               ),
             ),
@@ -521,11 +659,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       decoration: BoxDecoration(
         color: _kDeepNavy,
         borderRadius: BorderRadius.circular(16),
-        border: Border(
-          left: const BorderSide(color: _kNeonMint, width: 3),
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
-          right: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
-          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.06),
         ),
         boxShadow: [
           BoxShadow(
@@ -539,9 +674,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            bottom: 0,
+            child: Container(
+              width: 3,
+              decoration: const BoxDecoration(
+                color: _kNeonMint,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  bottomLeft: Radius.circular(16),
+                ),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           // ── Header row ──────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
@@ -577,6 +729,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               ],
             ),
           ),
+
+          // ── Question preview ────────────────────────────────────────
+          if (challenge != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A2D40),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: _kNeonMint.withValues(alpha: 0.20),
+                  ),
+                ),
+                child: Text(
+                  challenge.question,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: _kSoftGray,
+                    height: 1.45,
+                  ),
+                ),
+              ),
+            ),
 
           // ── Streak + Shield stat cells ──────────────────────────────
           Container(
@@ -688,6 +866,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                       ),
                     ),
                   ),
+          ),
+        ],
           ),
         ],
       ),

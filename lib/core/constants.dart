@@ -196,7 +196,12 @@ const Map<int, LevelMeta> kLevelMeta = {
       'ZamFresh Market',
       'CityConnect Airtime',
     ],
-    simulations: [kSimBudget, kSimEmergencyFund, kSimMobileMoneyFee, kSimQuizChallenge],
+    simulations: [
+      kSimBudget,
+      kSimEmergencyFund,
+      kSimMobileMoneyFee,
+      kSimQuizChallenge
+    ],
   ),
   2: LevelMeta(
     id: 2,
@@ -298,14 +303,14 @@ const String kStoryBox = 'story';
 // Quiz System — Category Constants
 // ─────────────────────────────────────────────────────────────────────────────
 
-const String kCatBudgeting        = 'BUDGETING';
-const String kCatSavings          = 'SAVINGS';
-const String kCatDebt             = 'DEBT';
-const String kCatInvesting        = 'INVESTING';
+const String kCatBudgeting = 'BUDGETING';
+const String kCatSavings = 'SAVINGS';
+const String kCatDebt = 'DEBT';
+const String kCatInvesting = 'INVESTING';
 const String kCatEntrepreneurship = 'ENTREPRENEURSHIP';
-const String kCatZambianFinance   = 'ZAMBIAN_FINANCE';
+const String kCatZambianFinance = 'ZAMBIAN_FINANCE';
 
-const int kQuizXpCorrect   = 30;
+const int kQuizXpCorrect = 30;
 const int kQuizXpIncorrect = 0;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -337,24 +342,27 @@ class QuizQuestion {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const List<QuizQuestion> kQuizQuestions = [
-
   // ── BUDGETING (10) ──────────────────────────────────────────────────────────
 
   QuizQuestion(
     id: 'q_b_01',
     category: kCatBudgeting,
-    question: 'The 50/30/20 rule recommends allocating what percentage of your income to savings and debt repayment?',
+    question:
+        'The 50/30/20 rule recommends allocating what percentage of your income to savings and debt repayment?',
     options: ['10%', '20%', '30%', '50%'],
     correctIndex: 1,
-    explanation: 'The 50/30/20 rule: 50% for needs (rent, food), 30% for wants (leisure), and 20% for savings and debt repayment. It is a simple starting framework for any income level.',
+    explanation:
+        'The 50/30/20 rule: 50% for needs (rent, food), 30% for wants (leisure), and 20% for savings and debt repayment. It is a simple starting framework for any income level.',
   ),
   QuizQuestion(
     id: 'q_b_02',
     category: kCatBudgeting,
-    question: 'Your monthly income is ZMW 5,000 and your rent is ZMW 1,800. What percentage of your income goes to rent?',
+    question:
+        'Your monthly income is ZMW 5,000 and your rent is ZMW 1,800. What percentage of your income goes to rent?',
     options: ['28%', '36%', '45%', '18%'],
     correctIndex: 1,
-    explanation: '1,800 ÷ 5,000 = 0.36 = 36%. Financial advisors recommend keeping housing costs below 30% of gross income. At 36%, this household is slightly over-housed.',
+    explanation:
+        '1,800 ÷ 5,000 = 0.36 = 36%. Financial advisors recommend keeping housing costs below 30% of gross income. At 36%, this household is slightly over-housed.',
   ),
   QuizQuestion(
     id: 'q_b_03',
@@ -367,7 +375,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A government-mandated contribution',
     ],
     correctIndex: 1,
-    explanation: 'Discretionary expenses are non-essential wants — entertainment, dining out, new clothes. They are the first category to reduce when building a budget or cutting costs.',
+    explanation:
+        'Discretionary expenses are non-essential wants — entertainment, dining out, new clothes. They are the first category to reduce when building a budget or cutting costs.',
   ),
   QuizQuestion(
     id: 'q_b_04',
@@ -380,7 +389,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A budget with no fixed expenses',
     ],
     correctIndex: 1,
-    explanation: 'Zero-based budgeting means every kwacha has a job. Income − (all allocations) = 0. This forces intentional decisions about every category and eliminates untracked spending.',
+    explanation:
+        'Zero-based budgeting means every kwacha has a job. Income − (all allocations) = 0. This forces intentional decisions about every category and eliminates untracked spending.',
   ),
   QuizQuestion(
     id: 'q_b_05',
@@ -393,7 +403,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Pay suppliers before receiving payment from customers',
     ],
     correctIndex: 1,
-    explanation: 'Paying yourself first means transferring your savings target on payday, before any discretionary spending. Savings become automatic rather than whatever is left over at month end.',
+    explanation:
+        'Paying yourself first means transferring your savings target on payday, before any discretionary spending. Savings become automatic rather than whatever is left over at month end.',
   ),
   QuizQuestion(
     id: 'q_b_06',
@@ -406,7 +417,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A term that only applies to government budgets',
     ],
     correctIndex: 1,
-    explanation: 'A personal budget deficit means your expenses exceeded your income. Persistent deficits lead to debt accumulation. Identifying and eliminating the deficit category is the first step to financial recovery.',
+    explanation:
+        'A personal budget deficit means your expenses exceeded your income. Persistent deficits lead to debt accumulation. Identifying and eliminating the deficit category is the first step to financial recovery.',
   ),
   QuizQuestion(
     id: 'q_b_07',
@@ -419,7 +431,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A bank account with a withdrawal penalty',
     ],
     correctIndex: 1,
-    explanation: 'A sinking fund is intentional savings for a specific known future cost — school fees in April, car service in June, Christmas gifts in December. Unlike an emergency fund, the timing and amount are predictable.',
+    explanation:
+        'A sinking fund is intentional savings for a specific known future cost — school fees in April, car service in June, Christmas gifts in December. Unlike an emergency fund, the timing and amount are predictable.',
   ),
   QuizQuestion(
     id: 'q_b_08',
@@ -432,7 +445,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Weekend entertainment',
     ],
     correctIndex: 2,
-    explanation: 'Fixed expenses remain the same amount each month — rent, loan repayments, subscription fees. Variable expenses fluctuate. Understanding this distinction helps predict monthly cash flow accurately.',
+    explanation:
+        'Fixed expenses remain the same amount each month — rent, loan repayments, subscription fees. Variable expenses fluctuate. Understanding this distinction helps predict monthly cash flow accurately.',
   ),
   QuizQuestion(
     id: 'q_b_09',
@@ -445,15 +459,23 @@ const List<QuizQuestion> kQuizQuestions = [
       'The rate at which your salary grows annually',
     ],
     correctIndex: 1,
-    explanation: 'Cash flow tracks real money in versus real money out. Positive cash flow (more in than out) allows saving and investing. Negative cash flow leads to debt. Monitoring it monthly is fundamental to financial health.',
+    explanation:
+        'Cash flow tracks real money in versus real money out. Positive cash flow (more in than out) allows saving and investing. Negative cash flow leads to debt. Monitoring it monthly is fundamental to financial health.',
   ),
   QuizQuestion(
     id: 'q_b_10',
     category: kCatBudgeting,
-    question: 'When prioritising your budget, which category should typically be funded LAST?',
-    options: ['Housing costs', 'Food and groceries', 'Debt repayments', 'Entertainment and leisure'],
+    question:
+        'When prioritising your budget, which category should typically be funded LAST?',
+    options: [
+      'Housing costs',
+      'Food and groceries',
+      'Debt repayments',
+      'Entertainment and leisure'
+    ],
     correctIndex: 3,
-    explanation: 'The correct order: needs (housing, food, transport, utilities), then obligations (debt repayments, NAPSA), then savings, then wants (entertainment, leisure). Wants are funded with whatever remains after the essentials.',
+    explanation:
+        'The correct order: needs (housing, food, transport, utilities), then obligations (debt repayments, NAPSA), then savings, then wants (entertainment, leisure). Wants are funded with whatever remains after the essentials.',
   ),
 
   // ── SAVINGS (10) ────────────────────────────────────────────────────────────
@@ -469,7 +491,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A government surcharge on savings account earnings',
     ],
     correctIndex: 2,
-    explanation: 'Compound interest earns interest on interest. A ZMW 1,000 deposit at 10% earns ZMW 100 in year 1, then in year 2 it earns 10% on ZMW 1,100 = ZMW 110. The growth accelerates over time.',
+    explanation:
+        'Compound interest earns interest on interest. A ZMW 1,000 deposit at 10% earns ZMW 100 in year 1, then in year 2 it earns 10% on ZMW 1,100 = ZMW 110. The growth accelerates over time.',
   ),
   QuizQuestion(
     id: 'q_s_02',
@@ -482,23 +505,28 @@ const List<QuizQuestion> kQuizQuestions = [
       'The minimum annual deposit required',
     ],
     correctIndex: 1,
-    explanation: 'APY (Annual Percentage Yield) reflects how much you actually earn per year, accounting for compounding. It is always equal to or higher than APR (Annual Percentage Rate). Use APY to compare savings products accurately.',
+    explanation:
+        'APY (Annual Percentage Yield) reflects how much you actually earn per year, accounting for compounding. It is always equal to or higher than APR (Annual Percentage Rate). Use APY to compare savings products accurately.',
   ),
   QuizQuestion(
     id: 'q_s_03',
     category: kCatSavings,
-    question: 'You save ZMW 400 per month for 3 years with no interest. How much do you have at the end?',
+    question:
+        'You save ZMW 400 per month for 3 years with no interest. How much do you have at the end?',
     options: ['ZMW 12,000', 'ZMW 14,400', 'ZMW 4,800', 'ZMW 1,200'],
     correctIndex: 1,
-    explanation: 'ZMW 400 × 36 months = ZMW 14,400. This is a simple linear savings calculation. Adding even a modest interest rate would grow this further through compounding.',
+    explanation:
+        'ZMW 400 × 36 months = ZMW 14,400. This is a simple linear savings calculation. Adding even a modest interest rate would grow this further through compounding.',
   ),
   QuizQuestion(
     id: 'q_s_04',
     category: kCatSavings,
-    question: 'Using the Rule of 72, how long does it take to double money at an 8% annual interest rate?',
+    question:
+        'Using the Rule of 72, how long does it take to double money at an 8% annual interest rate?',
     options: ['12 years', '9 years', '6 years', '18 years'],
     correctIndex: 1,
-    explanation: 'Rule of 72: divide 72 by the interest rate. 72 ÷ 8 = 9 years. This quick mental tool helps compare investment options without a calculator.',
+    explanation:
+        'Rule of 72: divide 72 by the interest rate. 72 ÷ 8 = 9 years. This quick mental tool helps compare investment options without a calculator.',
   ),
   QuizQuestion(
     id: 'q_s_05',
@@ -511,23 +539,28 @@ const List<QuizQuestion> kQuizQuestions = [
       'A microfinance loan product',
     ],
     correctIndex: 1,
-    explanation: 'Chilimba is a traditional Zambian rotating savings club (also called a tontine or ROSCA). Members contribute a fixed amount regularly and one member receives the full pool each cycle. It enforces saving discipline through social accountability.',
+    explanation:
+        'Chilimba is a traditional Zambian rotating savings club (also called a tontine or ROSCA). Members contribute a fixed amount regularly and one member receives the full pool each cycle. It enforces saving discipline through social accountability.',
   ),
   QuizQuestion(
     id: 'q_s_06',
     category: kCatSavings,
-    question: 'If inflation is 12% per year and your savings account pays 5% interest, what is your real return?',
+    question:
+        'If inflation is 12% per year and your savings account pays 5% interest, what is your real return?',
     options: ['+17%', '+5%', '-7%', '0%'],
     correctIndex: 2,
-    explanation: 'Real return = nominal interest rate − inflation rate = 5% − 12% = −7%. Your money is actually losing purchasing power despite earning nominal interest. This is why beating inflation matters.',
+    explanation:
+        'Real return = nominal interest rate − inflation rate = 5% − 12% = −7%. Your money is actually losing purchasing power despite earning nominal interest. This is why beating inflation matters.',
   ),
   QuizQuestion(
     id: 'q_s_07',
     category: kCatSavings,
-    question: 'Simple interest on ZMW 5,000 at 10% per year for 2 years equals:',
+    question:
+        'Simple interest on ZMW 5,000 at 10% per year for 2 years equals:',
     options: ['ZMW 500', 'ZMW 1,000', 'ZMW 1,100', 'ZMW 1,500'],
     correctIndex: 1,
-    explanation: 'Simple interest = Principal × Rate × Time = 5,000 × 10% × 2 = ZMW 1,000. Unlike compound interest, simple interest does not earn interest on the interest already accumulated.',
+    explanation:
+        'Simple interest = Principal × Rate × Time = 5,000 × 10% × 2 = ZMW 1,000. Unlike compound interest, simple interest does not earn interest on the interest already accumulated.',
   ),
   QuizQuestion(
     id: 'q_s_08',
@@ -540,20 +573,24 @@ const List<QuizQuestion> kQuizQuestions = [
       'Investing is tax-free; saving is taxed',
     ],
     correctIndex: 1,
-    explanation: 'Saving is conservative (bank accounts, mobile money) — low risk, low return, high liquidity. Investing accepts risk to pursue higher returns (unit trusts, stocks, property). Both have a role in a healthy financial plan.',
+    explanation:
+        'Saving is conservative (bank accounts, mobile money) — low risk, low return, high liquidity. Investing accepts risk to pursue higher returns (unit trusts, stocks, property). Both have a role in a healthy financial plan.',
   ),
   QuizQuestion(
     id: 'q_s_09',
     category: kCatSavings,
-    question: 'A financial emergency fund should ideally cover how many months of essential expenses?',
+    question:
+        'A financial emergency fund should ideally cover how many months of essential expenses?',
     options: ['1 month', '2 months', '3–6 months', '12 months'],
     correctIndex: 2,
-    explanation: 'Financial advisors universally recommend 3–6 months of essential expenses in a liquid emergency fund. This covers job loss, medical emergencies, or major repairs without resorting to high-interest debt.',
+    explanation:
+        'Financial advisors universally recommend 3–6 months of essential expenses in a liquid emergency fund. This covers job loss, medical emergencies, or major repairs without resorting to high-interest debt.',
   ),
   QuizQuestion(
     id: 'q_s_10',
     category: kCatSavings,
-    question: 'Which savings vehicle typically offers the highest long-term real returns?',
+    question:
+        'Which savings vehicle typically offers the highest long-term real returns?',
     options: [
       'Cash kept at home in a safe',
       'A standard bank savings account',
@@ -561,7 +598,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A mobile money wallet',
     ],
     correctIndex: 2,
-    explanation: 'Over the long term, diversified investments outperform savings accounts and inflation. Cash at home earns nothing and loses value to inflation. Mobile money wallets typically earn no interest.',
+    explanation:
+        'Over the long term, diversified investments outperform savings accounts and inflation. Cash at home earns nothing and loses value to inflation. Mobile money wallets typically earn no interest.',
   ),
 
   // ── DEBT (10) ───────────────────────────────────────────────────────────────
@@ -577,7 +615,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Ignoring debts until savings reach a target level',
     ],
     correctIndex: 1,
-    explanation: 'The avalanche method attacks the highest-interest debt first. It minimises the total interest paid over time, making it the mathematically optimal repayment strategy.',
+    explanation:
+        'The avalanche method attacks the highest-interest debt first. It minimises the total interest paid over time, making it the mathematically optimal repayment strategy.',
   ),
   QuizQuestion(
     id: 'q_d_02',
@@ -590,23 +629,28 @@ const List<QuizQuestion> kQuizQuestions = [
       'Freezing spending entirely while in debt',
     ],
     correctIndex: 1,
-    explanation: 'The snowball method eliminates small debts first. The psychological wins of closing accounts keep motivation high. It may cost more interest than the avalanche but works better behaviourally for many people.',
+    explanation:
+        'The snowball method eliminates small debts first. The psychological wins of closing accounts keep motivation high. It may cost more interest than the avalanche but works better behaviourally for many people.',
   ),
   QuizQuestion(
     id: 'q_d_03',
     category: kCatDebt,
-    question: 'Annual interest on a ZMW 10,000 loan at 25% interest with no payments made equals:',
+    question:
+        'Annual interest on a ZMW 10,000 loan at 25% interest with no payments made equals:',
     options: ['ZMW 1,500', 'ZMW 2,000', 'ZMW 2,500', 'ZMW 3,000'],
     correctIndex: 2,
-    explanation: 'ZMW 10,000 × 25% = ZMW 2,500 in interest for one year. Your balance after 12 months with no payments would be ZMW 12,500. This illustrates why leaving loans unpaid is so costly.',
+    explanation:
+        'ZMW 10,000 × 25% = ZMW 2,500 in interest for one year. Your balance after 12 months with no payments would be ZMW 12,500. This illustrates why leaving loans unpaid is so costly.',
   ),
   QuizQuestion(
     id: 'q_d_04',
     category: kCatDebt,
-    question: 'True or False: Paying only the minimum required monthly payment is the fastest way to clear a loan.',
+    question:
+        'True or False: Paying only the minimum required monthly payment is the fastest way to clear a loan.',
     options: ['True', 'False'],
     correctIndex: 1,
-    explanation: 'False. Minimum payments mostly cover interest, barely reducing the principal. Paying extra above the minimum reduces the principal faster, dramatically cutting both the loan duration and total interest paid.',
+    explanation:
+        'False. Minimum payments mostly cover interest, barely reducing the principal. Paying extra above the minimum reduces the principal faster, dramatically cutting both the loan duration and total interest paid.',
   ),
   QuizQuestion(
     id: 'q_d_05',
@@ -619,7 +663,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'The bank officer who processes your application',
     ],
     correctIndex: 1,
-    explanation: 'A guarantor takes on full legal liability if you default. If you miss payments, the lender can pursue the guarantor\'s assets. Being a guarantor is a serious financial commitment that should never be taken lightly.',
+    explanation:
+        'A guarantor takes on full legal liability if you default. If you miss payments, the lender can pursue the guarantor\'s assets. Being a guarantor is a serious financial commitment that should never be taken lightly.',
   ),
   QuizQuestion(
     id: 'q_d_06',
@@ -632,7 +677,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Your outstanding interest charges equal 40% of the principal',
     ],
     correctIndex: 1,
-    explanation: 'DTI ratio = monthly debt payments ÷ monthly gross income × 100. At 40%, most lenders consider you near maximum borrowing capacity. Many Zambian banks prefer DTI below 35% for new loan approvals.',
+    explanation:
+        'DTI ratio = monthly debt payments ÷ monthly gross income × 100. At 40%, most lenders consider you near maximum borrowing capacity. Many Zambian banks prefer DTI below 35% for new loan approvals.',
   ),
   QuizQuestion(
     id: 'q_d_07',
@@ -645,15 +691,18 @@ const List<QuizQuestion> kQuizQuestions = [
       'Converting a loan from one currency to another',
     ],
     correctIndex: 1,
-    explanation: 'An amortising loan has fixed instalments where the proportion of interest vs principal changes each period. Early payments are mostly interest; later payments mostly reduce principal. Understanding amortisation helps plan extra payments strategically.',
+    explanation:
+        'An amortising loan has fixed instalments where the proportion of interest vs principal changes each period. Early payments are mostly interest; later payments mostly reduce principal. Understanding amortisation helps plan extra payments strategically.',
   ),
   QuizQuestion(
     id: 'q_d_08',
     category: kCatDebt,
-    question: 'True or False: Missing a loan payment in Zambia has no long-term effect on your ability to borrow in the future.',
+    question:
+        'True or False: Missing a loan payment in Zambia has no long-term effect on your ability to borrow in the future.',
     options: ['True', 'False'],
     correctIndex: 1,
-    explanation: 'False. Zambian credit bureaus (such as Compuscan) record your payment history. Missed payments create a negative credit record that can disqualify you from future loans or result in higher interest rates.',
+    explanation:
+        'False. Zambian credit bureaus (such as Compuscan) record your payment history. Missed payments create a negative credit record that can disqualify you from future loans or result in higher interest rates.',
   ),
   QuizQuestion(
     id: 'q_d_09',
@@ -666,7 +715,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A loan taken to pay off another loan',
     ],
     correctIndex: 1,
-    explanation: 'Productive debt funds assets that generate returns above the borrowing cost — a business loan, investment property, or skills training. Consumer debt funds depreciating or consumed items and generally reduces net worth.',
+    explanation:
+        'Productive debt funds assets that generate returns above the borrowing cost — a business loan, investment property, or skills training. Consumer debt funds depreciating or consumed items and generally reduces net worth.',
   ),
   QuizQuestion(
     id: 'q_d_10',
@@ -679,7 +729,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'There is no practical difference for borrowers',
     ],
     correctIndex: 0,
-    explanation: 'Secured loans (mortgage, car loan) are backed by an asset the lender can seize if you default. This reduces lender risk, so rates are lower. Unsecured loans (personal loans, credit cards) carry higher rates because there is no collateral.',
+    explanation:
+        'Secured loans (mortgage, car loan) are backed by an asset the lender can seize if you default. This reduces lender risk, so rates are lower. Unsecured loans (personal loans, credit cards) carry higher rates because there is no collateral.',
   ),
 
   // ── INVESTING (10) ──────────────────────────────────────────────────────────
@@ -695,7 +746,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'You have access to the company\'s bank accounts',
     ],
     correctIndex: 1,
-    explanation: 'Shareholders are partial owners. If the company grows and profits, share value increases and dividends may be paid. If it performs poorly, you can lose money. There is no guarantee — unlike a bond or bank deposit.',
+    explanation:
+        'Shareholders are partial owners. If the company grows and profits, share value increases and dividends may be paid. If it performs poorly, you can lose money. There is no guarantee — unlike a bond or bank deposit.',
   ),
   QuizQuestion(
     id: 'q_i_02',
@@ -708,7 +760,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A type of savings account offered by local banks',
     ],
     correctIndex: 1,
-    explanation: 'LuSE (Lusaka Securities Exchange) is Zambia\'s stock market, established in 1994. It allows companies to raise capital from the public and gives Zambians access to equity investments in listed companies.',
+    explanation:
+        'LuSE (Lusaka Securities Exchange) is Zambia\'s stock market, established in 1994. It allows companies to raise capital from the public and gives Zambians access to equity investments in listed companies.',
   ),
   QuizQuestion(
     id: 'q_i_03',
@@ -721,15 +774,18 @@ const List<QuizQuestion> kQuizQuestions = [
       'The change in price of a share between two periods',
     ],
     correctIndex: 1,
-    explanation: 'Dividends reward shareholders from company profits. Not all companies pay dividends — growth companies often reinvest profits instead. Dividend-paying stocks provide an income stream alongside potential capital appreciation.',
+    explanation:
+        'Dividends reward shareholders from company profits. Not all companies pay dividends — growth companies often reinvest profits instead. Dividend-paying stocks provide an income stream alongside potential capital appreciation.',
   ),
   QuizQuestion(
     id: 'q_i_04',
     category: kCatInvesting,
-    question: 'True or False: An investment\'s past performance guarantees its future performance.',
+    question:
+        'True or False: An investment\'s past performance guarantees its future performance.',
     options: ['True', 'False'],
     correctIndex: 1,
-    explanation: 'False. Past performance is not a guarantee of future results — this is a legal disclaimer on every investment product for good reason. Markets are influenced by countless unpredictable factors. Evaluate investments on fundamentals, not just history.',
+    explanation:
+        'False. Past performance is not a guarantee of future results — this is a legal disclaimer on every investment product for good reason. Markets are influenced by countless unpredictable factors. Evaluate investments on fundamentals, not just history.',
   ),
   QuizQuestion(
     id: 'q_i_05',
@@ -742,7 +798,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A government restriction on foreign investment flows',
     ],
     correctIndex: 1,
-    explanation: 'Liquid investments (cash, publicly traded shares) can be sold quickly. Illiquid investments (property, private business) take time and may require price concessions to sell. Always match investment liquidity to when you may need the funds.',
+    explanation:
+        'Liquid investments (cash, publicly traded shares) can be sold quickly. Illiquid investments (property, private business) take time and may require price concessions to sell. Always match investment liquidity to when you may need the funds.',
   ),
   QuizQuestion(
     id: 'q_i_06',
@@ -755,7 +812,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'An insurance policy for investment losses',
     ],
     correctIndex: 1,
-    explanation: 'Bonds are essentially IOUs. You lend money to the issuer (government or corporation) for a fixed period. They pay you regular interest (coupon) and return your principal at maturity. Bonds are generally lower risk than equities.',
+    explanation:
+        'Bonds are essentially IOUs. You lend money to the issuer (government or corporation) for a fixed period. They pay you regular interest (coupon) and return your principal at maturity. Bonds are generally lower risk than equities.',
   ),
   QuizQuestion(
     id: 'q_i_07',
@@ -768,15 +826,18 @@ const List<QuizQuestion> kQuizQuestions = [
       'Interest Rate × Time Period',
     ],
     correctIndex: 0,
-    explanation: 'ROI = (Net Profit ÷ Cost of Investment) × 100%. If you invest ZMW 1,000 and earn ZMW 200 profit, your ROI is 20%. It is the universal measure for comparing the efficiency of different investments.',
+    explanation:
+        'ROI = (Net Profit ÷ Cost of Investment) × 100%. If you invest ZMW 1,000 and earn ZMW 200 profit, your ROI is 20%. It is the universal measure for comparing the efficiency of different investments.',
   ),
   QuizQuestion(
     id: 'q_i_08',
     category: kCatInvesting,
-    question: 'True or False: Diversification completely eliminates all investment risk.',
+    question:
+        'True or False: Diversification completely eliminates all investment risk.',
     options: ['True', 'False'],
     correctIndex: 1,
-    explanation: 'False. Diversification reduces unsystematic (company-specific) risk. However, systematic (market-wide) risk — economic downturns, currency crashes, political instability — affects all investments and cannot be diversified away.',
+    explanation:
+        'False. Diversification reduces unsystematic (company-specific) risk. However, systematic (market-wide) risk — economic downturns, currency crashes, political instability — affects all investments and cannot be diversified away.',
   ),
   QuizQuestion(
     id: 'q_i_09',
@@ -789,7 +850,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A government bond with a fixed guaranteed return',
     ],
     correctIndex: 1,
-    explanation: 'Unit trusts pool money from many investors. A professional fund manager invests it across a diversified portfolio. This gives small investors access to diversified holdings that would be unaffordable individually.',
+    explanation:
+        'Unit trusts pool money from many investors. A professional fund manager invests it across a diversified portfolio. This gives small investors access to diversified holdings that would be unaffordable individually.',
   ),
   QuizQuestion(
     id: 'q_i_10',
@@ -802,7 +864,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'The annual management fee charged by investment firms',
     ],
     correctIndex: 1,
-    explanation: 'Investment horizon determines appropriate risk levels. Short horizons (1–3 years) suit low-risk, liquid assets. Long horizons (10+ years) allow higher-risk investments that can ride out volatility and benefit from compound growth.',
+    explanation:
+        'Investment horizon determines appropriate risk levels. Short horizons (1–3 years) suit low-risk, liquid assets. Long horizons (10+ years) allow higher-risk investments that can ride out volatility and benefit from compound growth.',
   ),
 
   // ── ENTREPRENEURSHIP (10) ───────────────────────────────────────────────────
@@ -818,7 +881,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Total sales minus marketing and advertising costs only',
     ],
     correctIndex: 0,
-    explanation: 'Gross profit margin = (Revenue − COGS) ÷ Revenue × 100%. It shows how efficiently you produce or buy your goods. A low gross margin leaves little room for operating expenses and profit.',
+    explanation:
+        'Gross profit margin = (Revenue − COGS) ÷ Revenue × 100%. It shows how efficiently you produce or buy your goods. A low gross margin leaves little room for operating expenses and profit.',
   ),
   QuizQuestion(
     id: 'q_e_02',
@@ -831,7 +895,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Maintaining a register of company directors',
     ],
     correctIndex: 1,
-    explanation: 'TPIN is issued by the Zambia Revenue Authority (ZRA), not PACRA. PACRA (Patents and Companies Registration Agency) handles business registration, trademark registration, and company director records.',
+    explanation:
+        'TPIN is issued by the Zambia Revenue Authority (ZRA), not PACRA. PACRA (Patents and Companies Registration Agency) handles business registration, trademark registration, and company director records.',
   ),
   QuizQuestion(
     id: 'q_e_03',
@@ -844,7 +909,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Monthly cash flow turns positive for the first time',
     ],
     correctIndex: 0,
-    explanation: 'Break-even is where Revenue = Total Fixed Costs + Total Variable Costs. Below break-even you make a loss; above it you make a profit. Knowing your break-even is essential for pricing decisions.',
+    explanation:
+        'Break-even is where Revenue = Total Fixed Costs + Total Variable Costs. Below break-even you make a loss; above it you make a profit. Knowing your break-even is essential for pricing decisions.',
   ),
   QuizQuestion(
     id: 'q_e_04',
@@ -852,7 +918,8 @@ const List<QuizQuestion> kQuizQuestions = [
     question: 'True or False: Business revenue and profit are the same thing.',
     options: ['True', 'False'],
     correctIndex: 1,
-    explanation: 'False. Revenue is the total money received from sales. Profit is what remains after subtracting all costs (COGS, rent, salaries, tax). A business can have high revenue but still make a loss if costs are too high.',
+    explanation:
+        'False. Revenue is the total money received from sales. Profit is what remains after subtracting all costs (COGS, rent, salaries, tax). A business can have high revenue but still make a loss if costs are too high.',
   ),
   QuizQuestion(
     id: 'q_e_05',
@@ -865,15 +932,18 @@ const List<QuizQuestion> kQuizQuestions = [
       'The owner\'s personal savings invested in the business',
     ],
     correctIndex: 1,
-    explanation: 'Working capital = Current Assets − Current Liabilities. Positive working capital means the business can pay its short-term obligations. Negative working capital signals a cash flow crisis, even if the business is profitable on paper.',
+    explanation:
+        'Working capital = Current Assets − Current Liabilities. Positive working capital means the business can pay its short-term obligations. Negative working capital signals a cash flow crisis, even if the business is profitable on paper.',
   ),
   QuizQuestion(
     id: 'q_e_06',
     category: kCatEntrepreneurship,
-    question: 'ZRA\'s turnover tax in Zambia applies to businesses with annual turnover below:',
+    question:
+        'ZRA\'s turnover tax in Zambia applies to businesses with annual turnover below:',
     options: ['ZMW 200,000', 'ZMW 800,000', 'ZMW 2,000,000', 'ZMW 5,000,000'],
     correctIndex: 1,
-    explanation: 'Zambia\'s turnover tax regime applies to businesses with annual turnover below ZMW 800,000. It is simpler than corporate income tax and is charged as a percentage of gross revenue rather than net profit.',
+    explanation:
+        'Zambia\'s turnover tax regime applies to businesses with annual turnover below ZMW 800,000. It is simpler than corporate income tax and is charged as a percentage of gross revenue rather than net profit.',
   ),
   QuizQuestion(
     id: 'q_e_07',
@@ -886,15 +956,18 @@ const List<QuizQuestion> kQuizQuestions = [
       'There is no difference — profit and cash are always the same',
     ],
     correctIndex: 1,
-    explanation: 'Profit and cash are not the same. A business selling on credit may show profit before receiving payment. If suppliers demand cash before customers pay, the business faces a cash shortfall despite being profitable — a common cause of business failure.',
+    explanation:
+        'Profit and cash are not the same. A business selling on credit may show profit before receiving payment. If suppliers demand cash before customers pay, the business faces a cash shortfall despite being profitable — a common cause of business failure.',
   ),
   QuizQuestion(
     id: 'q_e_08',
     category: kCatEntrepreneurship,
-    question: 'True or False: Having a great product idea alone is enough to guarantee business success.',
+    question:
+        'True or False: Having a great product idea alone is enough to guarantee business success.',
     options: ['True', 'False'],
     correctIndex: 1,
-    explanation: 'False. Most failed businesses had good ideas. Execution, pricing, marketing, cash flow management, timing, and customer relationships are equally critical. Many brilliant ideas have failed for lack of financial discipline.',
+    explanation:
+        'False. Most failed businesses had good ideas. Execution, pricing, marketing, cash flow management, timing, and customer relationships are equally critical. Many brilliant ideas have failed for lack of financial discipline.',
   ),
   QuizQuestion(
     id: 'q_e_09',
@@ -907,7 +980,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Payment is due on the 30th of the current month',
     ],
     correctIndex: 1,
-    explanation: 'Net 30 means the buyer must pay the full amount within 30 calendar days of the invoice date. Standard B2B payment terms in Zambia range from Net 7 to Net 60. Late payments are a major cause of cash flow problems for small suppliers.',
+    explanation:
+        'Net 30 means the buyer must pay the full amount within 30 calendar days of the invoice date. Standard B2B payment terms in Zambia range from Net 7 to Net 60. Late payments are a major cause of cash flow problems for small suppliers.',
   ),
   QuizQuestion(
     id: 'q_e_10',
@@ -920,7 +994,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'A stock exchange for small and medium businesses',
     ],
     correctIndex: 1,
-    explanation: 'CEEC (Citizens Economic Empowerment Commission) provides accessible financing — grants, loans, and capacity building — to Zambian citizens, particularly previously disadvantaged groups, to start and grow businesses.',
+    explanation:
+        'CEEC (Citizens Economic Empowerment Commission) provides accessible financing — grants, loans, and capacity building — to Zambian citizens, particularly previously disadvantaged groups, to start and grow businesses.',
   ),
 
   // ── ZAMBIAN_FINANCE (10) ────────────────────────────────────────────────────
@@ -936,12 +1011,14 @@ const List<QuizQuestion> kQuizQuestions = [
       'Issuing business licences to financial companies',
     ],
     correctIndex: 1,
-    explanation: 'The Bank of Zambia (BoZ) is Zambia\'s central bank. It controls monetary policy, regulates commercial banks, manages foreign exchange reserves, and issues the Zambian kwacha.',
+    explanation:
+        'The Bank of Zambia (BoZ) is Zambia\'s central bank. It controls monetary policy, regulates commercial banks, manages foreign exchange reserves, and issues the Zambian kwacha.',
   ),
   QuizQuestion(
     id: 'q_z_02',
     category: kCatZambianFinance,
-    question: 'When the kwacha depreciates against the US dollar, what typically happens to the price of imported goods?',
+    question:
+        'When the kwacha depreciates against the US dollar, what typically happens to the price of imported goods?',
     options: [
       'They become cheaper because the kwacha is weaker',
       'They become more expensive because more kwacha are needed per dollar',
@@ -949,15 +1026,22 @@ const List<QuizQuestion> kQuizQuestions = [
       'They are restricted from import until the kwacha recovers',
     ],
     correctIndex: 1,
-    explanation: 'Currency depreciation makes imports more expensive. If ZMW 25 = USD 1 and the kwacha drops to ZMW 28 = USD 1, an item costing USD 10 rises from ZMW 250 to ZMW 280. Fuel, medicine, and electronics are particularly affected in Zambia.',
+    explanation:
+        'Currency depreciation makes imports more expensive. If ZMW 25 = USD 1 and the kwacha drops to ZMW 28 = USD 1, an item costing USD 10 rises from ZMW 250 to ZMW 280. Fuel, medicine, and electronics are particularly affected in Zambia.',
   ),
   QuizQuestion(
     id: 'q_z_03',
     category: kCatZambianFinance,
     question: 'Zambia\'s primary foreign exchange earner is:',
-    options: ['Maize and agriculture', 'Tourism and hospitality', 'Copper and mining', 'Manufacturing and textiles'],
+    options: [
+      'Maize and agriculture',
+      'Tourism and hospitality',
+      'Copper and mining',
+      'Manufacturing and textiles'
+    ],
     correctIndex: 2,
-    explanation: 'Copper accounts for approximately 70–80% of Zambia\'s export earnings. This makes the economy highly sensitive to global copper prices. When copper prices fall, the kwacha weakens and government revenues decline.',
+    explanation:
+        'Copper accounts for approximately 70–80% of Zambia\'s export earnings. This makes the economy highly sensitive to global copper prices. When copper prices fall, the kwacha weakens and government revenues decline.',
   ),
   QuizQuestion(
     id: 'q_z_04',
@@ -970,20 +1054,24 @@ const List<QuizQuestion> kQuizQuestions = [
       'A government grant programme for small businesses',
     ],
     correctIndex: 1,
-    explanation: 'NAPSA is Zambia\'s mandatory pension scheme. Both employees (5%) and employers (5%) contribute monthly, capped at ZMW 1,221.80 each (2024). Benefits are accessible at retirement age, permanent emigration, or death of the contributor.',
+    explanation:
+        'NAPSA is Zambia\'s mandatory pension scheme. Both employees (5%) and employers (5%) contribute monthly, capped at ZMW 1,221.80 each (2024). Benefits are accessible at retirement age, permanent emigration, or death of the contributor.',
   ),
   QuizQuestion(
     id: 'q_z_05',
     category: kCatZambianFinance,
-    question: 'True or False: Self-employed people in Zambia pay tax through the PAYE (Pay As You Earn) system.',
+    question:
+        'True or False: Self-employed people in Zambia pay tax through the PAYE (Pay As You Earn) system.',
     options: ['True', 'False'],
     correctIndex: 1,
-    explanation: 'False. PAYE applies only to employees whose employers deduct income tax from their salaries. Self-employed individuals and business owners file income tax returns directly with ZRA on a quarterly or annual basis.',
+    explanation:
+        'False. PAYE applies only to employees whose employers deduct income tax from their salaries. Self-employed individuals and business owners file income tax returns directly with ZRA on a quarterly or annual basis.',
   ),
   QuizQuestion(
     id: 'q_z_06',
     category: kCatZambianFinance,
-    question: 'The primary financial impact of ZESCO load-shedding on small Zambian businesses is:',
+    question:
+        'The primary financial impact of ZESCO load-shedding on small Zambian businesses is:',
     options: [
       'Reduced electricity bills due to less usage',
       'Higher operational costs and lost revenue from running generators and production downtime',
@@ -991,20 +1079,24 @@ const List<QuizQuestion> kQuizQuestions = [
       'Automatic reduction in staff salary obligations',
     ],
     correctIndex: 1,
-    explanation: 'Load-shedding forces businesses to run diesel generators, significantly increasing operational costs. Refrigeration-dependent businesses (butcheries, pharmacies) risk stock losses. Service businesses lose billable hours. It is a major barrier to Zambian SME growth.',
+    explanation:
+        'Load-shedding forces businesses to run diesel generators, significantly increasing operational costs. Refrigeration-dependent businesses (butcheries, pharmacies) risk stock losses. Service businesses lose billable hours. It is a major barrier to Zambian SME growth.',
   ),
   QuizQuestion(
     id: 'q_z_07',
     category: kCatZambianFinance,
-    question: 'Businesses in Zambia must register for VAT once their annual turnover exceeds:',
+    question:
+        'Businesses in Zambia must register for VAT once their annual turnover exceeds:',
     options: ['ZMW 200,000', 'ZMW 400,000', 'ZMW 800,000', 'ZMW 1,000,000'],
     correctIndex: 2,
-    explanation: 'Zambian law requires VAT registration when annual taxable turnover exceeds ZMW 800,000. Registered businesses charge 16% VAT on eligible sales and can reclaim VAT paid on business inputs.',
+    explanation:
+        'Zambian law requires VAT registration when annual taxable turnover exceeds ZMW 800,000. Registered businesses charge 16% VAT on eligible sales and can reclaim VAT paid on business inputs.',
   ),
   QuizQuestion(
     id: 'q_z_08',
     category: kCatZambianFinance,
-    question: 'The Financial Intelligence Centre (FIC) in Zambia primarily exists to:',
+    question:
+        'The Financial Intelligence Centre (FIC) in Zambia primarily exists to:',
     options: [
       'Monitor and control consumer price inflation',
       'Receive and analyse suspicious transaction reports to combat money laundering and financial crime',
@@ -1012,15 +1104,18 @@ const List<QuizQuestion> kQuizQuestions = [
       'Regulate insider trading on the Lusaka Stock Exchange',
     ],
     correctIndex: 1,
-    explanation: 'The FIC is Zambia\'s financial intelligence unit. Banks and financial institutions must report suspicious transactions. The FIC analyses these reports, identifies financial crime patterns, and shares intelligence with law enforcement.',
+    explanation:
+        'The FIC is Zambia\'s financial intelligence unit. Banks and financial institutions must report suspicious transactions. The FIC analyses these reports, identifies financial crime patterns, and shares intelligence with law enforcement.',
   ),
   QuizQuestion(
     id: 'q_z_09',
     category: kCatZambianFinance,
-    question: 'True or False: The Lusaka Securities Exchange (LuSE) is located in Ndola.',
+    question:
+        'True or False: The Lusaka Securities Exchange (LuSE) is located in Ndola.',
     options: ['True', 'False'],
     correctIndex: 1,
-    explanation: 'False. The Lusaka Securities Exchange (LuSE) is located in Lusaka, Zambia\'s capital. It was established in 1994 and lists a range of Zambian companies. Ndola is Zambia\'s second-largest city and the commercial capital of the Copperbelt.',
+    explanation:
+        'False. The Lusaka Securities Exchange (LuSE) is located in Lusaka, Zambia\'s capital. It was established in 1994 and lists a range of Zambian companies. Ndola is Zambia\'s second-largest city and the commercial capital of the Copperbelt.',
   ),
   QuizQuestion(
     id: 'q_z_10',
@@ -1033,7 +1128,8 @@ const List<QuizQuestion> kQuizQuestions = [
       'Applying for a national identity card',
     ],
     correctIndex: 2,
-    explanation: 'A TPIN is mandatory for filing ZRA tax returns, registering a business with PACRA, applying for government tenders, and some banking services. Every formal business in Zambia must have one.',
+    explanation:
+        'A TPIN is mandatory for filing ZRA tax returns, registering a business with PACRA, applying for government tenders, and some banking services. Every formal business in Zambia must have one.',
   ),
 ];
 
@@ -1041,11 +1137,11 @@ const List<QuizQuestion> kQuizQuestions = [
 // Kwacha Chronicles — Illustration Tag Constants
 // ─────────────────────────────────────────────────────────────────────────────
 
-const String kIllustMarketStall  = 'MARKET_STALL';
-const String kIllustSupplier     = 'SUPPLIER';
-const String kIllustCoins        = 'COINS';
-const String kIllustBuilding     = 'BUILDING';
-const String kIllustCertificate  = 'CERTIFICATE';
+const String kIllustMarketStall = 'MARKET_STALL';
+const String kIllustSupplier = 'SUPPLIER';
+const String kIllustCoins = 'COINS';
+const String kIllustBuilding = 'BUILDING';
+const String kIllustCertificate = 'CERTIFICATE';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Kwacha Chronicles — StoryChapterData class
@@ -1082,7 +1178,6 @@ class StoryChapterData {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const List<StoryChapterData> kStoryChapters = [
-
   StoryChapterData(
     chapterId: 1,
     title: 'The Inheritance',
@@ -1101,7 +1196,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'Bwalya agrees enthusiastically but misses three restocking days in the first month. You spend more time managing conflict than managing customers. The partnership has no written agreement, which makes it legally difficult to separate. Financial lesson: Partnerships need clear written agreements before money is involved.',
   ),
-
   StoryChapterData(
     chapterId: 2,
     title: 'The First Restock',
@@ -1120,7 +1214,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'The extra stock sells well but not fast enough. Some tomatoes spoil by day five. You sell ZMW 830 worth and owe ZMW 1,008. After repayment you are left with ZMW 222 — less than if you had bought smaller. Financial lesson: Unsold perishable stock is not an asset. Inventory management is as important as sales volume.',
   ),
-
   StoryChapterData(
     chapterId: 3,
     title: 'The Loan Decision',
@@ -1139,7 +1232,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'You wait and save. Month four arrives and you have ZMW 1,200. You expand conservatively using your own money. The expansion is slower but every kwacha of increased profit is fully yours. You miss some rainy-season peak but avoid interest payments. Financial lesson: Patience with self-funding preserves margin. The compounding effect favours those who avoid unnecessary interest costs.',
   ),
-
   StoryChapterData(
     chapterId: 4,
     title: 'The Bad Debtor',
@@ -1152,13 +1244,13 @@ const List<StoryChapterData> kStoryChapters = [
         'She reflects on her credit policy. Several other market customers ask to buy on account. Ba Tembo the supplier advises her to set a firm credit limit and always get a signature. Her cousin Bwalya says informal credit is just the cost of doing business and she should accept it.\n\n'
         'Financial lesson: Trade credit without documentation is an unsecured gift. Every business needs a credit policy before extending informal loans to customers.',
     choiceA: 'Stop all customer credit entirely — cash only from now on',
-    choiceB: 'Keep offering credit but introduce a ZMW 200 limit and written receipts',
+    choiceB:
+        'Keep offering credit but introduce a ZMW 200 limit and written receipts',
     choiceAOutcome:
         'Two of your best regular customers, small restaurants, move to a competitor who still offers credit. Monthly sales drop ZMW 280 for six weeks before stabilising with a new cash-only customer base. Financial lesson: Eliminating credit entirely can cost loyal customers. Balance risk management with commercial flexibility.',
     choiceBOutcome:
         'You print simple credit receipt forms. Customers sign each time. Your ZMW 200 limit means maximum exposure per customer is manageable. Bad debts drop significantly. Regular restaurant clients stay because the process feels professional and trustworthy. Financial lesson: Systems prevent losses better than blanket refusals. Documentation transforms goodwill credit into enforceable business practice.',
   ),
-
   StoryChapterData(
     chapterId: 5,
     title: 'School Fees Season',
@@ -1171,13 +1263,13 @@ const List<StoryChapterData> kStoryChapters = [
         'Her neighbour suggests a chilimba group that pays out ZMW 1,500 to one member next week — and that member has offered to swap positions with Mwansa in exchange for a small fee.\n\n'
         'Financial lesson: Seasonal obligations like school fees must be planned as sinking funds, not emergency costs. The stress Mwansa feels today is the price of not planning ahead.',
     choiceA: 'Take a microfinance loan at 35% annual interest for ZMW 1,200',
-    choiceB: 'Swap chilimba positions and pay the fee to access ZMW 1,500 early',
+    choiceB:
+        'Swap chilimba positions and pay the fee to access ZMW 1,500 early',
     choiceAOutcome:
         'The loan arrives quickly. Fees are paid on time. Monthly repayments of ZMW 240 over six months stretch your budget but are manageable. Total interest: approximately ZMW 210. Children attend school without disruption. Financial lesson: Planned debt for essential obligations is sometimes rational, but the same ZMW 210 could have been saved in monthly instalments before the deadline.',
     choiceBOutcome:
         'You swap positions for a ZMW 80 fee. Fees are paid. Next month your own chilimba payout does not come because you already received your allocation early. The cycle adjusts but you learn the mechanics of rotating savings. Financial lesson: Informal savings groups offer real financial flexibility when built into a planned routine rather than used as emergency rescue.',
   ),
-
   StoryChapterData(
     chapterId: 6,
     title: 'The Kwacha Drop',
@@ -1196,7 +1288,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'Margin falls from 27% to 19% for the month. But the kwacha partially recovers after three weeks as copper prices strengthen. By the end of the month your costs stabilise without having disrupted customer relationships. Financial lesson: Short-term margin sacrifice can preserve long-term customer loyalty. Building cash reserves makes this strategy viable.',
   ),
-
   StoryChapterData(
     chapterId: 7,
     title: 'The First Employee',
@@ -1208,14 +1299,15 @@ const List<StoryChapterData> kStoryChapters = [
         'A young woman named Chisomo approaches her. She is 19 years old, recently finished Grade 12, and lives in the same neighbourhood. She is looking for honest work and has helped at a relative\'s shop. She asks for ZMW 900 per month plus a small sales bonus.\n\n'
         'With Chisomo managing the stall from midday, Mwansa could focus on the clinic and visit the wholesale market only three mornings a week. But ZMW 900 is 69% of current net profit. Can the stall absorb this cost? And what are her legal obligations as an employer in Zambia?\n\n'
         'Financial lesson: Hiring is a leveraged investment. The right employee can multiply your output, but employment in Zambia carries NAPSA obligations, written contract requirements, and notice period rules.',
-    choiceA: 'Hire Chisomo at ZMW 900 per month with a written employment contract',
-    choiceB: 'Continue alone but reduce stall hours to manage workload sustainably',
+    choiceA:
+        'Hire Chisomo at ZMW 900 per month with a written employment contract',
+    choiceB:
+        'Continue alone but reduce stall hours to manage workload sustainably',
     choiceAOutcome:
         'Chisomo proves reliable and customers like her. Within six weeks the stall\'s improved consistency grows daily turnover by 18%. Net profit rises to ZMW 1,550. After Chisomo\'s wage the stall nets ZMW 650 — but your time at the clinic improves your performance and you avoid burnout. Financial lesson: Delegation can cost money but protect your most limited resource: your time and health.',
     choiceBOutcome:
         'Reduced hours mean less stock and fewer customers. Profit drops to ZMW 980. You are less exhausted but the business is smaller. A competitor takes some of your former customers. Financial lesson: Sometimes accepting a lower profit ceiling is the right life decision. Not every business must grow if growth costs your wellbeing.',
   ),
-
   StoryChapterData(
     chapterId: 8,
     title: 'PACRA Registration',
@@ -1228,13 +1320,13 @@ const List<StoryChapterData> kStoryChapters = [
         'Some market neighbours tell Mwansa not to register — it will attract tax attention and cost more money. Others say registration is the first step toward legitimate growth. The PACRA office is a 20-minute minibus ride away.\n\n'
         'Financial lesson: Formalisation has an upfront cost but opens doors to cheaper credit, formal procurement, and legal protection. The informal economy provides safety in obscurity; the formal economy provides access to scale.',
     choiceA: 'Register with PACRA immediately and open a business bank account',
-    choiceB: 'Remain informal for now and revisit registration when profit is higher',
+    choiceB:
+        'Remain informal for now and revisit registration when profit is higher',
     choiceAOutcome:
         'Registration takes one day and costs ZMW 295. You open a Zanaco business account. Three months later a school nutrition programme issues a tender for vegetable supply. You qualify because you have a registered business name and a business bank account. The contract adds ZMW 600 monthly in reliable income. Financial lesson: Formalisation is an investment, not just a cost.',
     choiceBOutcome:
         'You continue informally. No immediate consequences. But six months later a business banking product launches with preferential loan rates for registered businesses. You cannot access it. Staying informal is a comfortable but limiting choice. Financial lesson: Informal status creates a ceiling on growth. The timing of formalisation should be strategic, not indefinitely deferred.',
   ),
-
   StoryChapterData(
     chapterId: 9,
     title: 'The Theft',
@@ -1253,7 +1345,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'Full restock happens fast. Revenue returns to normal within one week. But the ZMW 2,000 loan at 40% adds approximately ZMW 67 monthly in repayments over 12 months. The total theft cost was ZMW 1,200; the total loan cost is ZMW 1,600 when interest is included. Financial lesson: Emergency debt amplifies loss. The true cost of the theft just became ZMW 400 more expensive through interest.',
   ),
-
   StoryChapterData(
     chapterId: 10,
     title: 'ZRA Tax Returns',
@@ -1266,13 +1357,13 @@ const List<StoryChapterData> kStoryChapters = [
         'A neighbourhood accountant named Mr Mfula offers to file her returns for ZMW 350. He will also set up a simple record-keeping system going forward. Alternatively, Mwansa can attempt to file herself at the ZRA offices — it is free but will take a full day she cannot easily afford.\n\n'
         'Financial lesson: Tax compliance is an ongoing obligation, not a one-time event. Good record-keeping is the foundation of painless tax filing. The cost of an accountant is often less than the cost of missing records.',
     choiceA: 'Hire Mr Mfula to file professionally and set up record-keeping',
-    choiceB: 'Self-file at ZRA — it is free and she will learn the process herself',
+    choiceB:
+        'Self-file at ZRA — it is free and she will learn the process herself',
     choiceAOutcome:
         'Mr Mfula files correctly, identifies a deductible expense Mwansa missed, and saves her more than ZMW 350 in tax. He creates a simple spreadsheet she updates weekly. Next year\'s filing takes two hours and costs nothing. Financial lesson: Professional advice pays for itself when it prevents errors and reveals deductions.',
     choiceBOutcome:
         'The ZRA office day is long and confusing. An officer is helpful but the forms require income data Mwansa cannot produce accurately. She estimates and files, worried about errors. She resolves to keep better records next year. Financial lesson: Self-filing is empowering once you understand the process. The learning curve has a real cost in time, uncertainty, and potential errors.',
   ),
-
   StoryChapterData(
     chapterId: 11,
     title: 'The Second Stall',
@@ -1291,7 +1382,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'You decline. Another trader takes the stall. It performs well. You feel regret initially but channel the energy into improving your own systems. Six months later a different expansion opportunity arises — you are better prepared for it. Financial lesson: Discipline to wait for readiness creates more sustainable growth than chasing every opportunity.',
   ),
-
   StoryChapterData(
     chapterId: 12,
     title: 'The Silent Investor',
@@ -1304,13 +1394,13 @@ const List<StoryChapterData> kStoryChapters = [
         'She consults Mr Mfula the accountant. He calculates that ZMW 8,000 at ZMW 360 per month means Mr Tembo recoups his investment in roughly 22 months. After that Mwansa pays ZMW 360 monthly from her profit every month indefinitely unless she buys him out.\n\n'
         'Financial lesson: Equity investment has no maturity date. Unlike a loan with a fixed repayment term, giving away profit share means ongoing cost. Evaluate equity deals by their long-term cost, not their short-term cash injection.',
     choiceA: 'Accept Mr Tembo\'s ZMW 8,000 for a 30% profit share',
-    choiceB: 'Decline and save for the refrigeration unit independently over 8 months',
+    choiceB:
+        'Decline and save for the refrigeration unit independently over 8 months',
     choiceAOutcome:
         'The refrigeration unit reduces spoilage by 30%. Monthly profit rises to ZMW 1,600. Mr Tembo\'s 30% takes ZMW 480. You net ZMW 1,120 — slightly less than before, but growth continues. At what point does improved profit make the equity stake cost-effective versus buying him out? Track this carefully. Financial lesson: Equity investors accelerate growth but permanently reduce your margin unless a buyout clause is built into the agreement.',
     choiceBOutcome:
         'Eight months of disciplined saving accumulates ZMW 7,200. You negotiate a ZMW 9,500 refrigeration unit to ZMW 8,800 cash. Purchase made. Spoilage drops. Every kwacha of increased profit is entirely yours. Financial lesson: Patient self-funding preserves 100% equity ownership. The cost is time and the opportunity cost of delayed growth.',
   ),
-
   StoryChapterData(
     chapterId: 13,
     title: 'Harvest Season Rush',
@@ -1322,14 +1412,14 @@ const List<StoryChapterData> kStoryChapters = [
         'A wholesaler offers Mwansa a bulk deal: ZMW 4,500 buys enough tomatoes to last four weeks at current sales rates, at a 22% discount versus buying weekly. The tomatoes must be used or sold within three weeks. Her refrigeration unit helps but cannot handle the full quantity.\n\n'
         'If she takes the deal, she needs to move stock quickly, potentially selling to other smaller traders at a slight margin to avoid spoilage. If she passes on it, she continues buying weekly at higher prices, protecting her quality but missing the seasonal margin opportunity.\n\n'
         'Financial lesson: Seasonal price drops create bulk buying opportunities. The key constraint is storage capacity and sell-through rate. Buying more than you can sell before expiry is waste, not savings.',
-    choiceA: 'Take the bulk deal and aggressively sell on to neighbouring traders',
+    choiceA:
+        'Take the bulk deal and aggressively sell on to neighbouring traders',
     choiceB: 'Stick to weekly buying and maintain quality control',
     choiceAOutcome:
         'You buy in bulk and sell 40% of the excess to three neighbouring small traders at a small markup. They are glad for the convenience. You move all stock within 19 days and net an extra ZMW 680 this month from the margin and bulk discount combined. Financial lesson: Seasonal surplus trading can create a wholesale income stream alongside your retail stall.',
     choiceBOutcome:
         'Quality remains high. No spoilage. Margins are better than the dry season but not exceptional. You miss the bulk opportunity but sleep soundly. Financial lesson: Predictable, quality-focused operations can be more sustainable than aggressive margin-chasing. Know which business model suits your capacity.',
   ),
-
   StoryChapterData(
     chapterId: 14,
     title: 'The Credit Crisis',
@@ -1348,7 +1438,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'Relative lends ZMW 300 graciously. You repay within 10 days from sales. The bridging smooths the crisis without disrupting stock levels or the supplier relationship. Financial lesson: Trusted personal relationships are informal credit lines that cost only the obligation of repayment and relationship maintenance.',
   ),
-
   StoryChapterData(
     chapterId: 15,
     title: 'Staff Problems',
@@ -1361,13 +1450,13 @@ const List<StoryChapterData> kStoryChapters = [
         'She must decide whether to give Chisomo a formal written warning (as required by Zambian labour law before any disciplinary action) or to have an informal conversation first to understand what is happening. Acting without following the correct process could expose Mwansa to a labour dispute.\n\n'
         'Financial lesson: Employment relationships in Zambia are governed by the Employment Code Act. Skipping proper disciplinary procedures — even with clear justification — can result in costly wrongful dismissal claims. Good HR practice protects both employer and employee.',
     choiceA: 'Issue a formal written warning as the first official step',
-    choiceB: 'Have a private informal conversation first before any formal action',
+    choiceB:
+        'Have a private informal conversation first before any formal action',
     choiceAOutcome:
         'The written warning shocks Chisomo but she takes it seriously. She reveals her mother is ill and she has been leaving early to help at home. You adjust her schedule by one hour. Performance recovers within two weeks. The written record protects you legally if performance does not improve. Financial lesson: Documented, fair process protects the business and respects the employee\'s dignity.',
     choiceBOutcome:
         'The informal conversation reveals Chisomo\'s family situation. You agree on a temporary adjusted schedule. Performance improves immediately. No formal documentation needed. Financial lesson: Not every performance issue requires formal escalation. Understanding context first can resolve conflict faster and preserve a productive working relationship.',
   ),
-
   StoryChapterData(
     chapterId: 16,
     title: 'Going Digital',
@@ -1386,7 +1475,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'Dual system works well. Younger customers use MoMo. Older customers continue with cash. The flexibility keeps everyone. You manually reconcile both streams weekly. Record-keeping improves but not dramatically. Financial lesson: Meeting customers where they are — rather than where you want them to be — retains loyalty while allowing gradual digital migration.',
   ),
-
   StoryChapterData(
     chapterId: 17,
     title: 'The CEEC Application',
@@ -1405,7 +1493,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'Mr Mfula\'s plan is professionally formatted with a five-year revenue projection and cash flow table. Application score is high. Result: ZMW 12,000 loan at 10% and a ZMW 3,000 non-repayable equipment grant. The ZMW 500 fee returned multiples. Financial lesson: Professional presentation of real business strength amplifies grant success. Investing in your application\'s quality is itself a business investment.',
   ),
-
   StoryChapterData(
     chapterId: 18,
     title: 'The New Competition',
@@ -1418,13 +1505,13 @@ const List<StoryChapterData> kStoryChapters = [
         'She has several options: match his prices and accept lower margin, differentiate by adding products or services he does not offer, build customer loyalty through quality and personal relationships, or diversify her customer base to include institutional buyers who value consistency over price.\n\n'
         'Financial lesson: Competition is permanent. A business that survives only when there is no competitor has no real competitive advantage. The test of a business is how it responds to pressure — through differentiation, loyalty, or niche specialisation.',
     choiceA: 'Match his prices and compete directly on cost',
-    choiceB: 'Differentiate through quality, loyalty, and institutional supply contracts',
+    choiceB:
+        'Differentiate through quality, loyalty, and institutional supply contracts',
     choiceAOutcome:
         'Matching prices recovers some foot traffic but squeezes your margin to unsustainable levels. After six weeks you cannot afford your CEEC repayment comfortably. You must either find another cost reduction or concede the price-sensitive customers and refocus on value buyers. Financial lesson: Competing purely on price requires structural cost advantages. Without them, price wars destroy both competitors.',
     choiceBOutcome:
         'You focus on the school nutrition programme contract (which your competitor cannot access without a registered business) and build a loyal premium customer segment. Revenue recovers to 85% of pre-competition levels within two months — with better customers. Financial lesson: Competing on relationships and reliability rather than price creates a more defensible position.',
   ),
-
   StoryChapterData(
     chapterId: 19,
     title: 'The Crossroads',
@@ -1443,7 +1530,6 @@ const List<StoryChapterData> kStoryChapters = [
     choiceBOutcome:
         'You sign the Woodlands lease at ZMW 4,500 per month. It is the scariest financial commitment of your life. But the new location and proper shop format attracts both walk-in customers and the institutional buyers you have been building relationships with for two years. By month four, monthly revenue exceeds ZMW 18,000. Financial lesson: The biggest business risks are often taken by those who have earned them through years of disciplined preparation.',
   ),
-
   StoryChapterData(
     chapterId: 20,
     title: 'The Harvest',
@@ -1492,10 +1578,10 @@ class SeasonalEvent {
 }
 
 // Seasonal theme constants
-const String kSeasonThemeNewYear   = 'NEW_YEAR';
+const String kSeasonThemeNewYear = 'NEW_YEAR';
 const String kSeasonThemeSchoolFees = 'SCHOOL_FEES';
-const String kSeasonThemeFarming   = 'FARMING';
-const String kSeasonThemeHarvest   = 'HARVEST';
+const String kSeasonThemeFarming = 'FARMING';
+const String kSeasonThemeHarvest = 'HARVEST';
 const String kSeasonThemeChristmas = 'CHRISTMAS';
 
 // ─────────────────────────────────────────────────────────────────────────────

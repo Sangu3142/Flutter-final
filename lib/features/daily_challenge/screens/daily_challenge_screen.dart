@@ -277,31 +277,59 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
 
   Widget _buildQuestionCard(DailyChallenge challenge) {
     return Container(
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kDeepNavy,
         borderRadius: BorderRadius.circular(16),
-        border: Border(
-          left: const BorderSide(color: _kNeonMint, width: 3),
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
-          right: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
-          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
-        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: _kNeonMint.withValues(alpha: 0.08),
+            blurRadius: 12,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Text(
-        challenge.question,
-        style: GoogleFonts.inter(
-          fontSize: 17,
-          color: Colors.white,
-          height: 1.6,
-          fontWeight: FontWeight.w500,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 4, color: _kNeonMint),
+              Expanded(
+                child: Container(
+                  color: const Color(0xFF1A2D40),
+                  padding: const EdgeInsets.fromLTRB(16, 20, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "TODAY'S QUESTION",
+                        style: GoogleFonts.orbitron(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _kNeonMint,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        challenge.question,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: Colors.white,
+                          height: 1.55,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
