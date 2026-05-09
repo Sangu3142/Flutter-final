@@ -54,6 +54,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   late final AnimationController _xpCtrl;
   late final Animation<double> _xpAnim;
 
+  // XP bar glow — flashes and fades when XP is gained
+  late final AnimationController _xpGlowCtrl;
+  late final Animation<double> _xpGlowAnim;
+
   // Streak pulse
   late final AnimationController _streakCtrl;
   late final Animation<double> _streakScale;
@@ -76,6 +80,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     _xpAnim = CurvedAnimation(parent: _xpCtrl, curve: Curves.easeOutCubic);
     _xpCtrl.forward();
 
+    _xpGlowCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+    // Peaks quickly at 25% of duration, then fades slowly for the rest.
+    _xpGlowAnim = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 0.0, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 75,
+      ),
+    ]).animate(_xpGlowCtrl);
+
     _streakCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1400),
@@ -90,6 +112,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   @override
   void dispose() {
     _xpCtrl.dispose();
+    _xpGlowCtrl.dispose();
     _streakCtrl.dispose();
     super.dispose();
   }
@@ -233,10 +256,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Fire sparkle whenever XP increases
+    // Fire sparkle + glow whenever XP increases, re-animate the fill bar
     ref.listen<DashboardState?>(dashboardProvider, (prev, next) {
       if (prev != null && next != null && next.xp > prev.xp) {
         _xpSparkleKey.currentState?.trigger();
+        _xpCtrl.forward(from: 0);
+        _xpGlowCtrl.forward(from: 0);
       }
     });
 
@@ -593,18 +618,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           // XP bar with glow and sparkle
           SparkleOverlay(
             key: _xpSparkleKey,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: AnimatedBuilder(
-                animation: _xpAnim,
-                builder: (_, __) => CustomPaint(
-                  painter: _XpBarPainter(
-                    progress: dash.progressPercent * _xpAnim.value,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_xpAnim, _xpGlowAnim]),
+              builder: (_, __) {
+                final g = _xpGlowAnim.value;
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: g > 0.01
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFF36ECDE)
+                                  .withValues(alpha: g * 0.85),
+                              blurRadius: 22 * g,
+                              spreadRadius: 3 * g,
+                            ),
+                            BoxShadow(
+                              color: Colors.white
+                                  .withValues(alpha: g * 0.35),
+                              blurRadius: 10 * g,
+                            ),
+                          ]
+                        : [],
                   ),
-                  child: const SizedBox(
-                      width: double.infinity, height: 16),
-                ),
-              ),
+                  child: CustomPaint(
+                    painter: _XpBarPainter(
+                      progress: dash.progressPercent * _xpAnim.value,
+                      glowIntensity: g,
+                    ),
+                    child: const SizedBox(
+                        width: double.infinity, height: 16),
+                  ),
+                );
+              },
             ),
           ),
 
@@ -925,7 +971,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
   Widget _buildBudgetCard(BuildContext context, DashboardState dash) {
     final uid = dash.user.uid;
-    final raw = Hive.box(kSettingsBox).get('budget_alloc_$uid');
+    final box = Hive.box(kSettingsBox);
+    final raw = box.get('budget_alloc_$uid');
     final Map<String, double>? alloc = raw == null
         ? null
         : Map<String, double>.fromEntries(
@@ -933,6 +980,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               (e) => MapEntry(e.key as String, (e.value as num).toDouble()),
             ),
           );
+    final rawIncome = box.get('budget_income_$uid');
+    final double savedIncome =
+        rawIncome != null ? (rawIncome as num).toDouble() : 3500.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -977,7 +1027,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         Text(
                           alloc == null
                               ? 'No allocation saved yet'
-                              : 'ZMW 3,500 / month',
+                              : 'ZMW ${savedIncome.toStringAsFixed(0)} / month',
                           style: GoogleFonts.rajdhani(
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
@@ -1047,7 +1097,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                 children: alloc.entries.map((entry) {
                   final cat = entry.key;
                   final pct = entry.value;
-                  final zmw = (pct / 100) * 3500;
+                  final zmw = (pct / 100) * savedIncome;
                   final barColor =
                       _budgetColors[cat] ?? _kNeonMint;
                   final emoji = _budgetEmojis[cat] ?? '💵';
@@ -1769,9 +1819,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _XpBarPainter extends CustomPainter {
-  const _XpBarPainter({required this.progress});
+  const _XpBarPainter({required this.progress, this.glowIntensity = 0.0});
 
   final double progress;
+  final double glowIntensity;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1798,12 +1849,22 @@ class _XpBarPainter extends CustomPainter {
           ).createShader(Rect.fromLTWH(0, 0, fillW, h))
           ..style = PaintingStyle.fill,
       );
+
+      // In-bar white flash overlay when XP is gained
+      if (glowIntensity > 0) {
+        canvas.drawRRect(
+          RRect.fromLTRBR(0, 0, fillW, h, radius),
+          Paint()
+            ..color = Colors.white.withValues(alpha: glowIntensity * 0.55)
+            ..style = PaintingStyle.fill,
+        );
+      }
     }
   }
 
   @override
   bool shouldRepaint(covariant _XpBarPainter old) =>
-      old.progress != progress;
+      old.progress != progress || old.glowIntensity != glowIntensity;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

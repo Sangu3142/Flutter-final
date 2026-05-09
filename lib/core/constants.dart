@@ -312,6 +312,7 @@ const String kCatZambianFinance = 'ZAMBIAN_FINANCE';
 
 const int kQuizXpCorrect = 30;
 const int kQuizXpIncorrect = 0;
+const int kQuizCoinsCorrect = 10;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Quiz System — QuizQuestion data class

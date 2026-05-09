@@ -26,7 +26,7 @@ class BudgetSimulation extends ConsumerStatefulWidget {
 }
 
 class _BudgetSimulationState extends ConsumerState<BudgetSimulation> {
-  static const double _monthlyIncome = 3500.0;
+  double _monthlyIncome = 3500.0;
 
   // Allocation percentages per category (must sum ≤ 100)
   final Map<String, double> _allocations = {
@@ -146,8 +146,8 @@ class _BudgetSimulationState extends ConsumerState<BudgetSimulation> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Drag the sliders to allocate your ZMW 3,500 monthly income across categories. '
-          'Aim to save at least 10% (ZMW 350).',
+          'Drag the sliders to allocate your ZMW ${_monthlyIncome.toStringAsFixed(0)} monthly income across categories. '
+          'Aim to save at least 10% (ZMW ${(_monthlyIncome * 0.1).toStringAsFixed(0)}).',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: kCharcoalLight,
                 height: 1.4,
@@ -161,26 +161,54 @@ class _BudgetSimulationState extends ConsumerState<BudgetSimulation> {
 
   Widget _incomeBanner(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
       decoration: BoxDecoration(
         color: kCopper.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: kCopper.withValues(alpha: 0.3)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '💼 Monthly Income',
-            style: Theme.of(context).textTheme.titleSmall,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '💼 Monthly Income',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              Text(
+                'ZMW ${_monthlyIncome.toStringAsFixed(0)}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: kCopper,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ],
           ),
-          Text(
-            'ZMW ${_monthlyIncome.toStringAsFixed(0)}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: kCopper,
-                  fontWeight: FontWeight.w800,
-                ),
+          Slider(
+            value: _monthlyIncome,
+            min: 0,
+            max: 20000,
+            divisions: 40,
+            activeColor: kCopper,
+            inactiveColor: kCopper.withValues(alpha: 0.20),
+            onChanged: (v) => setState(() => _monthlyIncome = v),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'ZMW 0',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+              Text(
+                'ZMW 20,000',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
         ],
       ),
     );
@@ -203,7 +231,7 @@ class _BudgetSimulationState extends ConsumerState<BudgetSimulation> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '⚠️ Savings below 10%! Financial advisors recommend saving at least ZMW 350/month.',
+              '⚠️ Savings below 10%! Financial advisors recommend saving at least ZMW ${(_monthlyIncome * 0.1).toStringAsFixed(0)}/month.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: kWarning,
                     fontWeight: FontWeight.w600,
@@ -370,8 +398,8 @@ class _BudgetSimulationState extends ConsumerState<BudgetSimulation> {
           const SizedBox(height: 6),
           Text(
             'The 50/30/20 rule: spend 50% on needs (rent, food, transport), '
-            '30% on wants (leisure), and save/invest 20%. With ZMW 3,500: '
-            'save ZMW 700, spend ZMW 1,750 on needs, ZMW 1,050 on wants.',
+            '30% on wants (leisure), and save/invest 20%. With ZMW ${_monthlyIncome.toStringAsFixed(0)}: '
+            'save ZMW ${(_monthlyIncome * 0.20).toStringAsFixed(0)}, spend ZMW ${(_monthlyIncome * 0.50).toStringAsFixed(0)} on needs, ZMW ${(_monthlyIncome * 0.30).toStringAsFixed(0)} on wants.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: kCharcoal,
                   height: 1.5,
@@ -391,10 +419,12 @@ class _BudgetSimulationState extends ConsumerState<BudgetSimulation> {
           : () {
               final uid = ref.read(currentUserProvider)?.uid;
               if (uid != null) {
-                Hive.box(kSettingsBox).put(
+                final box = Hive.box(kSettingsBox);
+                box.put(
                   'budget_alloc_$uid',
                   Map<String, dynamic>.from(_allocations),
                 );
+                box.put('budget_income_$uid', _monthlyIncome);
               }
               widget.onComplete();
             },

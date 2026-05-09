@@ -14,6 +14,7 @@ class QuizSession {
     this.selectedAnswer = -1,
     this.revealed = false,
     this.sessionXP = 0,
+    this.sessionCoins = 0,
     this.correctCount = 0,
   });
 
@@ -22,6 +23,7 @@ class QuizSession {
   final int selectedAnswer; // -1 = not yet answered
   final bool revealed;
   final int sessionXP;
+  final int sessionCoins;
   final int correctCount;
 
   bool get isDone => currentIndex >= questions.length;
@@ -35,6 +37,7 @@ class QuizSession {
     int? selectedAnswer,
     bool? revealed,
     int? sessionXP,
+    int? sessionCoins,
     int? correctCount,
   }) {
     return QuizSession(
@@ -43,6 +46,7 @@ class QuizSession {
       selectedAnswer: selectedAnswer ?? this.selectedAnswer,
       revealed: revealed ?? this.revealed,
       sessionXP: sessionXP ?? this.sessionXP,
+      sessionCoins: sessionCoins ?? this.sessionCoins,
       correctCount: correctCount ?? this.correctCount,
     );
   }
@@ -66,14 +70,17 @@ class QuizNotifier extends StateNotifier<QuizSession> {
 
     final isCorrect = index == q.correctIndex;
     int newSessionXP = state.sessionXP;
+    int newSessionCoins = state.sessionCoins;
     int newCorrect = state.correctCount;
 
     if (isCorrect) {
       newSessionXP += q.xpReward;
+      newSessionCoins += kQuizCoinsCorrect;
       newCorrect += 1;
       final user = _ref.read(currentUserProvider);
       if (user != null) {
         user.addQuizXp(q.xpReward, q.id);
+        user.addZamCoins(kQuizCoinsCorrect);
         user.save();
         _ref.read(authProvider.notifier).refreshUser();
       }
@@ -83,6 +90,7 @@ class QuizNotifier extends StateNotifier<QuizSession> {
       selectedAnswer: index,
       revealed: true,
       sessionXP: newSessionXP,
+      sessionCoins: newSessionCoins,
       correctCount: newCorrect,
     );
   }

@@ -445,30 +445,89 @@ class QuizScreen extends ConsumerWidget {
                     style: GoogleFonts.inter(fontSize: 16, color: _kSoftGray),
                   ),
                   const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 20),
-                    decoration: BoxDecoration(
-                      color: _kDeepNavy,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                          color: _kNeonMint.withValues(alpha: 0.30)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.bolt, color: _kNeonMint, size: 28),
-                        const SizedBox(width: 8),
-                        Text(
-                          '+${session.sessionXP} XP earned',
-                          style: GoogleFonts.orbitron(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: _kNeonMint,
-                          ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: _kDeepNavy,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: _kNeonMint.withValues(alpha: 0.35)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _kNeonMint.withValues(alpha: 0.15),
+                              blurRadius: 12,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.bolt,
+                                color: _kNeonMint, size: 26),
+                            const SizedBox(height: 4),
+                            Text(
+                              '+${session.sessionXP}',
+                              style: GoogleFonts.orbitron(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: _kNeonMint,
+                              ),
+                            ),
+                            Text(
+                              'XP',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: _kNeonMint,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: _kDeepNavy,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: _kGold.withValues(alpha: 0.35)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _kGold.withValues(alpha: 0.15),
+                              blurRadius: 12,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.monetization_on,
+                                color: _kGold, size: 26),
+                            const SizedBox(height: 4),
+                            Text(
+                              '+${session.sessionCoins}',
+                              style: GoogleFonts.orbitron(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: _kGold,
+                              ),
+                            ),
+                            Text(
+                              'COINS',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: _kGold,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 36),
                   Row(

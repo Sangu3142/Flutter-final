@@ -43,49 +43,61 @@ class LeaderboardScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Column(
-            children: [
-              // ── Header ──────────────────────────────────────────────
-              _buildHeader(context),
+          child: OrientationBuilder(
+            builder: (context, orientation) {
+              final isLandscape = orientation == Orientation.landscape;
+              return Column(
+                children: [
+                  // ── Header ──────────────────────────────────────────────
+                  _buildHeader(context),
 
-              // ── Top 3 Podium ─────────────────────────────────────────
-              if (entries.length >= 3) _buildPodium(context, entries),
+                  // ── Top 3 Podium (portrait only) ─────────────────────────
+                  if (entries.length >= 3 && !isLandscape)
+                    _buildPodium(context, entries),
 
-              const SizedBox(height: 8),
+                  if (!isLandscape) const SizedBox(height: 8),
 
-              // ── Full List ──────────────────────────────────────────
-              Expanded(
-                child: ListView.separated(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: entries.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final e = entries[index];
-                    return _buildEntryTile(
-                      context,
-                      e,
-                      index + 1,
-                      isCurrentUser: e['isCurrentUser'] as bool,
-                    );
-                  },
-                ),
-              ),
-
-              // ── Disclaimer ─────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  '📴 Local leaderboard only — other players are simulated placeholders.',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: _kSoftGray.withValues(alpha: 0.45),
-                    fontStyle: FontStyle.italic,
+                  // ── Full List ──────────────────────────────────────────
+                  Expanded(
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: isLandscape ? 4 : 8,
+                      ),
+                      itemCount: entries.length,
+                      separatorBuilder: (_, __) => SizedBox(
+                        height: isLandscape ? 4 : 8,
+                      ),
+                      itemBuilder: (context, index) {
+                        final e = entries[index];
+                        return _buildEntryTile(
+                          context,
+                          e,
+                          index + 1,
+                          isCurrentUser: e['isCurrentUser'] as bool,
+                          compact: isLandscape,
+                        );
+                      },
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
+
+                  // ── Disclaimer ─────────────────────────────────────────
+                  if (!isLandscape)
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        '📴 Local leaderboard only — other players are simulated placeholders.',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: _kSoftGray.withValues(alpha: 0.45),
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -261,6 +273,7 @@ class LeaderboardScreen extends ConsumerWidget {
     Map<String, dynamic> entry,
     int rank, {
     required bool isCurrentUser,
+    bool compact = false,
   }) {
     final badgeEmojis = {
       'budget_master': '📊',
@@ -275,7 +288,7 @@ class LeaderboardScreen extends ConsumerWidget {
     final rankLabel = xpRankLabel(xp);
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+      padding: EdgeInsets.symmetric(vertical: compact ? 5 : 10, horizontal: 14),
       decoration: BoxDecoration(
         color: isCurrentUser
             ? _kNeonMint.withValues(alpha: 0.08)
