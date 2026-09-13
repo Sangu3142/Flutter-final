@@ -3,6 +3,9 @@
 /// All badge IDs are stable — they are persisted in Hive via earnedBadges.
 library;
 
+import 'package:zamwealth_quest/core/constants.dart'
+    show kBadgeStorySaver, kBadgeStoryInvestor, kBadgeStoryEntrepreneur;
+
 enum BadgeTier { bronze, silver, gold, platinum }
 
 class AppBadge {
@@ -194,6 +197,42 @@ const List<AppBadge> kAllBadges = [
     unlockedBy: 'Earn 5,000 XP',
   ),
 
+  // ── DAILY LOGIN BONUS ─────────────────────────────────────────
+  AppBadge(
+    id: 'weekly_devotee',
+    title: 'Weekly Devotee',
+    description: 'Claimed your Day 7 login bonus',
+    emoji: '📅',
+    tier: BadgeTier.gold,
+    unlockedBy: 'Claim 7 consecutive daily bonuses',
+  ),
+
+  // ── STORY PATH ───────────────────────────────────────────────────────────
+  AppBadge(
+    id: kBadgeStorySaver,
+    title: 'The Saver',
+    description: 'Made savings-focused choices throughout the story.',
+    emoji: '💰',
+    tier: BadgeTier.silver,
+    unlockedBy: 'Make savings-focused story choices',
+  ),
+  AppBadge(
+    id: kBadgeStoryInvestor,
+    title: 'The Investor',
+    description: 'Chose investment-focused decisions in the story.',
+    emoji: '📈',
+    tier: BadgeTier.silver,
+    unlockedBy: 'Make investment-focused story choices',
+  ),
+  AppBadge(
+    id: kBadgeStoryEntrepreneur,
+    title: 'The Entrepreneur',
+    description: 'Pursued entrepreneurial choices throughout the story.',
+    emoji: '🏪',
+    tier: BadgeTier.gold,
+    unlockedBy: 'Make entrepreneurial story choices',
+  ),
+
   // ── DAILY CHALLENGE STREAK ───────────────────────────────────
   AppBadge(
     id: 'streak_3',
@@ -218,6 +257,174 @@ const List<AppBadge> kAllBadges = [
     emoji: '👑',
     tier: BadgeTier.platinum,
     unlockedBy: 'Maintain a 30-day daily challenge streak',
+  ),
+
+  // ── BOSS BADGES ──────────────────────────────────────────────
+  AppBadge(
+    id: 'boss_1_defeated',
+    title: 'Debt Buster',
+    description: 'Defeated Chipata the Debt Collector',
+    emoji: '⚔️',
+    tier: BadgeTier.silver,
+    unlockedBy: 'Defeat Boss 1: Chipata the Debt Collector',
+  ),
+  AppBadge(
+    id: 'boss_2_defeated',
+    title: 'Credit Crusher',
+    description: 'Defeated Mulenga the Loan Shark',
+    emoji: '⚔️',
+    tier: BadgeTier.gold,
+    unlockedBy: 'Defeat Boss 2: Mulenga the Loan Shark',
+  ),
+  AppBadge(
+    id: 'boss_3_defeated',
+    title: 'Market Victor',
+    description: 'Defeated Kabwe the Gambler',
+    emoji: '⚔️',
+    tier: BadgeTier.gold,
+    unlockedBy: 'Defeat Boss 3: Kabwe the Gambler',
+  ),
+  AppBadge(
+    id: 'boss_4_defeated',
+    title: 'Enterprise Champion',
+    description: 'Defeated Mutale the Tax Evader',
+    emoji: '⚔️',
+    tier: BadgeTier.platinum,
+    unlockedBy: 'Defeat Boss 4: Mutale the Tax Evader',
+  ),
+
+  // ── SEASON BADGES ────────────────────────────────────────────
+  AppBadge(
+    id: 'season_gold',
+    title: 'Season Champion',
+    description: 'Season leaderboard #1',
+    emoji: '🥇',
+    tier: BadgeTier.platinum,
+    unlockedBy: 'Finish #1 on the season leaderboard',
+  ),
+  AppBadge(
+    id: 'season_silver',
+    title: 'Season Runner-Up',
+    description: 'Season leaderboard #2',
+    emoji: '🥈',
+    tier: BadgeTier.gold,
+    unlockedBy: 'Finish #2 on the season leaderboard',
+  ),
+  AppBadge(
+    id: 'season_bronze',
+    title: 'Season Third',
+    description: 'Season leaderboard #3',
+    emoji: '🥉',
+    tier: BadgeTier.silver,
+    unlockedBy: 'Finish #3 on the season leaderboard',
+  ),
+
+  // ── CO-OP BADGE ──────────────────────────────────────────────
+  AppBadge(
+    id: 'coop_teacher',
+    title: "Zamu's Teacher",
+    description: 'Taught Zamu 5 times (correct while Zamu was wrong)',
+    emoji: '🎓',
+    tier: BadgeTier.bronze,
+    unlockedBy: 'Be correct while Zamu is wrong 5 times',
+  ),
+
+  // ── MONTHLY BADGES ───────────────────────────────────────────
+  AppBadge(
+    id: 'monthly_jan',
+    title: 'January Achiever',
+    description: "Completed January's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete January's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_feb',
+    title: 'February Achiever',
+    description: "Completed February's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete February's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_mar',
+    title: 'March Achiever',
+    description: "Completed March's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete March's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_apr',
+    title: 'April Achiever',
+    description: "Completed April's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete April's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_may',
+    title: 'May Achiever',
+    description: "Completed May's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete May's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_jun',
+    title: 'June Achiever',
+    description: "Completed June's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete June's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_jul',
+    title: 'July Achiever',
+    description: "Completed July's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete July's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_aug',
+    title: 'August Achiever',
+    description: "Completed August's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete August's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_sep',
+    title: 'September Achiever',
+    description: "Completed September's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete September's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_oct',
+    title: 'October Achiever',
+    description: "Completed October's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete October's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_nov',
+    title: 'November Achiever',
+    description: "Completed November's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete November's monthly challenge",
+  ),
+  AppBadge(
+    id: 'monthly_dec',
+    title: 'December Achiever',
+    description: "Completed December's monthly challenge",
+    emoji: '📆',
+    tier: BadgeTier.silver,
+    unlockedBy: "Complete December's monthly challenge",
   ),
 ];
 

@@ -15,6 +15,7 @@ import 'package:zamwealth_quest/features/auth/models/user_profile.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
 import 'package:zamwealth_quest/features/badges/providers/badge_provider.dart';
 import 'package:zamwealth_quest/features/levels/models/level_model.dart';
+import 'package:zamwealth_quest/features/proverbs/providers/proverb_provider.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Level State
@@ -245,6 +246,10 @@ class LevelNotifier extends StateNotifier<LevelState> {
         // Award XP to the player
         user.addXp(meta.xpReward);
 
+        // Award ZamCoins to wallet on level completion
+        const completionCoins = {1: 50, 2: 100, 3: 150, 4: 200};
+        user.addWalletCoins(completionCoins[levelId] ?? 50);
+
         // Update currentLevel if this is the highest completed level
         if (levelId > user.currentLevel) {
           user.currentLevel = levelId;
@@ -252,6 +257,7 @@ class LevelNotifier extends StateNotifier<LevelState> {
 
         await user.save();
         _ref.read(authProvider.notifier).refreshUser();
+        _ref.read(proverbUnlockProvider.notifier).unlockProverbsForLevel(levelId);
       } else if (model.status == kStatusUnlocked) {
         // ── TRANSITION: UNLOCKED → IN_PROGRESS ──────────────────────────
         model.status = kStatusInProgress;

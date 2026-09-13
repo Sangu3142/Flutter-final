@@ -6,6 +6,7 @@ library;
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/badges/models/badge_model.dart';
@@ -18,7 +19,7 @@ import 'package:zamwealth_quest/features/badges/providers/badge_provider.dart';
 const _bronze = Color(0xFFCD7F32);
 const _silver = Color(0xFFC0C0C0);
 const _gold = kGold;
-const _platinum = Color(0xFFE5E4E2);
+const _platinum = Color(0xFF7B61FF);
 
 Color _tierColor(BadgeTier tier) {
   switch (tier) {
@@ -46,6 +47,32 @@ String _tierLabel(BadgeTier tier) {
   }
 }
 
+IconData _tierIcon(BadgeTier tier) {
+  switch (tier) {
+    case BadgeTier.bronze:
+      return FontAwesomeIcons.medal;
+    case BadgeTier.silver:
+      return FontAwesomeIcons.medal;
+    case BadgeTier.gold:
+      return FontAwesomeIcons.trophy;
+    case BadgeTier.platinum:
+      return FontAwesomeIcons.gem;
+  }
+}
+
+List<Color> _tierGradient(BadgeTier tier) {
+  switch (tier) {
+    case BadgeTier.bronze:
+      return [const Color(0xFF3D2010), const Color(0xFF1A0D00)];
+    case BadgeTier.silver:
+      return [const Color(0xFF1E2A38), const Color(0xFF0D1520)];
+    case BadgeTier.gold:
+      return [const Color(0xFF2D2000), const Color(0xFF120D00)];
+    case BadgeTier.platinum:
+      return [const Color(0xFF1A1050), const Color(0xFF0A0620)];
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Badges Screen
 // ─────────────────────────────────────────────────────────────────────────────
@@ -62,43 +89,73 @@ class BadgesScreen extends ConsumerWidget {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: kCream,
+        backgroundColor: kCoreNavy,
         appBar: AppBar(
-          backgroundColor: kCopper,
+          backgroundColor: kDeepNavy,
           title: Text(
             'My Badges',
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: kCharcoal,
               fontSize: 18,
             ),
           ),
-          bottom: const TabBar(
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            indicatorColor: Colors.white,
-            tabs: [
+          bottom: TabBar(
+            labelColor: kNeonMint,
+            unselectedLabelColor: kCharcoalLight,
+            indicatorColor: kNeonMint,
+            labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
+            tabs: const [
               Tab(text: 'All'),
               Tab(text: 'Earned'),
               Tab(text: 'Locked'),
             ],
           ),
         ),
-        body: Column(
+        body: SafeArea(
+          top: false,
+          child: Column(
           children: [
-            // Earned count banner
+            // Progress banner
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              color: kGreen,
-              child: Text(
-                '$earnedCount / $totalCount Badges Earned',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [kDeepNavy, kCoreNavy],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                border: Border(
+                  bottom: BorderSide(color: kNeonMint, width: 1),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const FaIcon(FontAwesomeIcons.trophy, color: kGold, size: 16),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$earnedCount / $totalCount Badges Earned',
+                    style: GoogleFonts.poppins(
+                      color: kCharcoal,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: totalCount > 0 ? earnedCount / totalCount : 0,
+                        backgroundColor: kCharcoalLight.withValues(alpha: 0.2),
+                        valueColor: const AlwaysStoppedAnimation<Color>(kNeonMint),
+                        minHeight: 6,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -117,6 +174,7 @@ class BadgesScreen extends ConsumerWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -137,31 +195,44 @@ class _BadgeGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     if (badges.isEmpty) {
       return Center(
-        child: Text(
-          'Nothing here yet!',
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: kCharcoalLight),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const FaIcon(FontAwesomeIcons.lockOpen, color: kCharcoalLight, size: 36),
+            const SizedBox(height: 12),
+            Text(
+              'Nothing here yet — keep playing!',
+              style: GoogleFonts.poppins(color: kCharcoalLight, fontSize: 13),
+            ),
+          ],
         ),
       );
     }
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      cacheExtent: 200,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 0.78,
+        childAspectRatio: 0.76,
       ),
       itemCount: badges.length,
       itemBuilder: (context, index) {
         final badge = badges[index];
         final earned = badgeMap[badge.id] == true;
-        return BadgeTile(
-          badge: badge,
-          earned: earned,
-          onTap: () => _showDetail(context, badge, earned),
+        return _StaggeredFadeIn(
+          index: index,
+          child: BadgeTile(
+            badge: badge,
+            earned: earned,
+            onTap: () => _showDetail(context, badge, earned),
+          ),
         );
       },
     );
@@ -200,7 +271,7 @@ class BadgeTile extends StatefulWidget {
 class _BadgeTileState extends State<BadgeTile>
     with SingleTickerProviderStateMixin {
   AnimationController? _shimmer;
-  Animation<Color?>? _shimmerColor;
+  Animation<double>? _shimmerAnim;
 
   @override
   void initState() {
@@ -210,10 +281,7 @@ class _BadgeTileState extends State<BadgeTile>
         vsync: this,
         duration: const Duration(seconds: 2),
       )..repeat(reverse: true);
-      _shimmerColor = ColorTween(
-        begin: Colors.white,
-        end: kGold.withValues(alpha: 0.2),
-      ).animate(_shimmer!);
+      _shimmerAnim = Tween<double>(begin: 0.0, end: 1.0).animate(_shimmer!);
     }
   }
 
@@ -229,57 +297,97 @@ class _BadgeTileState extends State<BadgeTile>
     if (_shimmer != null) {
       return AnimatedBuilder(
         animation: _shimmer!,
-        builder: (_, __) => _earnedTile(context, _shimmerColor?.value),
+        builder: (_, __) => _earnedTile(context, _shimmerAnim?.value ?? 0),
       );
     }
-    return _earnedTile(context, null);
+    return _earnedTile(context, 0);
   }
 
-  Widget _earnedTile(BuildContext context, Color? shimmerBg) {
+  Widget _earnedTile(BuildContext context, double shimmerT) {
     final tc = _tierColor(widget.badge.tier);
+    final gradients = _tierGradient(widget.badge.tier);
+    // Platinum gets an extra shimmer overlay
+    final overlayAlpha = widget.badge.tier == BadgeTier.platinum
+        ? (shimmerT * 0.18)
+        : 0.0;
+
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: shimmerBg ?? Colors.white,
+          gradient: LinearGradient(
+            colors: gradients,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: tc, width: 2),
+          border: Border.all(color: tc, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: tc.withValues(alpha: 0.25),
-              blurRadius: 8,
+              color: tc.withValues(alpha: 0.35),
+              blurRadius: 10,
               offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Text(widget.badge.emoji,
-                style: const TextStyle(fontSize: 32)),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                widget.badge.title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: kCharcoal,
+            if (overlayAlpha > 0)
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(11),
+                  color: _platinum.withValues(alpha: overlayAlpha),
                 ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _tierLabel(widget.badge.tier),
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                color: tc,
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Tier icon badge in top-right corner
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 6, right: 6),
+                    child: FaIcon(
+                      _tierIcon(widget.badge.tier),
+                      color: tc,
+                      size: 11,
+                    ),
+                  ),
+                ),
+                Text(widget.badge.emoji,
+                    style: const TextStyle(fontSize: 30)),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    widget.badge.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: kCharcoal,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FaIcon(_tierIcon(widget.badge.tier), color: tc, size: 8),
+                    const SizedBox(width: 3),
+                    Text(
+                      _tierLabel(widget.badge.tier),
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w700,
+                        color: tc,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -292,9 +400,9 @@ class _BadgeTileState extends State<BadgeTile>
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFE8E8E8),
+          color: const Color(0xFF0A1220),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: kCharcoalLight.withValues(alpha: 0.3)),
+          border: Border.all(color: kCharcoalLight.withValues(alpha: 0.15)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -303,14 +411,25 @@ class _BadgeTileState extends State<BadgeTile>
               alignment: Alignment.bottomRight,
               children: [
                 Opacity(
-                  opacity: 0.5,
+                  opacity: 0.25,
                   child: Text(widget.badge.emoji,
-                      style: const TextStyle(fontSize: 32)),
+                      style: const TextStyle(fontSize: 30)),
                 ),
-                const Text('🔒', style: TextStyle(fontSize: 14)),
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: kCoreNavy,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const FaIcon(
+                    FontAwesomeIcons.lock,
+                    color: kCharcoalLight,
+                    size: 11,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 5),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
@@ -318,14 +437,14 @@ class _BadgeTileState extends State<BadgeTile>
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 11,
+                style: GoogleFonts.poppins(
+                  fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: kCharcoalLight,
+                  color: kCharcoalLight.withValues(alpha: 0.6),
                 ),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
@@ -333,7 +452,10 @@ class _BadgeTileState extends State<BadgeTile>
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 8, color: kCharcoalLight),
+                style: TextStyle(
+                  fontSize: 8,
+                  color: kCharcoalLight.withValues(alpha: 0.4),
+                ),
               ),
             ),
           ],
@@ -357,13 +479,18 @@ class BadgeDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final tc = _tierColor(badge.tier);
     return DraggableScrollableSheet(
-      initialChildSize: 0.4,
-      minChildSize: 0.3,
-      maxChildSize: 0.75,
+      initialChildSize: 0.42,
+      minChildSize: 0.32,
+      maxChildSize: 0.78,
       builder: (_, controller) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [kDeepNavy, kCoreNavy],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(color: tc.withValues(alpha: 0.4), width: 1),
         ),
         child: SingleChildScrollView(
           controller: controller,
@@ -387,12 +514,36 @@ class BadgeDetailSheet extends StatelessWidget {
                   alignment: Alignment.center,
                   children: [
                     if (earned)
-                      SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: CustomPaint(painter: _ConfettiPainter()),
+                      RepaintBoundary(
+                        child: SizedBox(
+                          width: 120,
+                          height: 120,
+                          child: CustomPaint(painter: _ConfettiPainter(tc)),
+                        ),
                       ),
-                    Text(badge.emoji, style: const TextStyle(fontSize: 64)),
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            tc.withValues(alpha: earned ? 0.25 : 0.05),
+                            Colors.transparent,
+                          ],
+                        ),
+                        border: earned
+                            ? Border.all(color: tc.withValues(alpha: 0.6), width: 2)
+                            : null,
+                      ),
+                      child: Center(
+                        child: Opacity(
+                          opacity: earned ? 1.0 : 0.3,
+                          child: Text(badge.emoji,
+                              style: const TextStyle(fontSize: 48)),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -400,6 +551,7 @@ class BadgeDetailSheet extends StatelessWidget {
                 // Title
                 Text(
                   badge.title,
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -408,21 +560,28 @@ class BadgeDetailSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // Tier chip
+                // Tier chip with FA icon
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: tc.withValues(alpha: 0.15),
+                    color: tc.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: tc),
+                    border: Border.all(color: tc.withValues(alpha: 0.6)),
                   ),
-                  child: Text(
-                    _tierLabel(badge.tier),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: tc == _platinum ? kCharcoalLight : tc,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FaIcon(_tierIcon(badge.tier), color: tc, size: 12),
+                      const SizedBox(width: 6),
+                      Text(
+                        _tierLabel(badge.tier),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: tc,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -431,28 +590,47 @@ class BadgeDetailSheet extends StatelessWidget {
                 Text(
                   badge.description,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 14,
-                    color: kCharcoal,
-                    height: 1.5,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: kCharcoalLight,
+                    height: 1.6,
                   ),
                 ),
                 const SizedBox(height: 16),
 
-                // Status
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      earned ? '✅ Earned' : '🔒 ${badge.unlockedBy}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: earned ? kGreen : kCharcoalLight,
-                      ),
+                // Status pill
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: earned
+                        ? kGreen.withValues(alpha: 0.12)
+                        : kCharcoalLight.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: earned
+                          ? kGreen.withValues(alpha: 0.5)
+                          : kCharcoalLight.withValues(alpha: 0.2),
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FaIcon(
+                        earned ? FontAwesomeIcons.circleCheck : FontAwesomeIcons.lock,
+                        color: earned ? kGreen : kCharcoalLight,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        earned ? 'Earned!' : badge.unlockedBy,
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: earned ? kGreen : kCharcoalLight,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -468,34 +646,92 @@ class BadgeDetailSheet extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ConfettiPainter extends CustomPainter {
-  static const _colors = [
-    Color(0xFFFFD700),
-    Color(0xFFCD7F32),
-    Color(0xFF2E8B57),
-    Color(0xFFB87333),
-    Color(0xFFC0C0C0),
-    Color(0xFFE57C00),
-  ];
+  final Color primaryColor;
+  const _ConfettiPainter(this.primaryColor);
 
   @override
   void paint(Canvas canvas, Size size) {
     final cx = size.width / 2;
     final cy = size.height / 2;
-    const radius = 48.0;
-    const dotRadius = 5.0;
+    const radius = 50.0;
+    const dotRadius = 4.5;
     const count = 12;
+
+    final colors = [
+      primaryColor,
+      kNeonMint,
+      kGold,
+      kGreen,
+      kPrimaryBlue,
+      primaryColor.withValues(alpha: 0.7),
+    ];
 
     for (int i = 0; i < count; i++) {
       final angle = (2 * pi * i) / count;
       final x = cx + radius * cos(angle);
       final y = cy + radius * sin(angle);
       final paint = Paint()
-        ..color = _colors[i % _colors.length]
+        ..color = colors[i % colors.length]
         ..style = PaintingStyle.fill;
       canvas.drawCircle(Offset(x, y), dotRadius, paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _ConfettiPainter old) =>
+      old.primaryColor != primaryColor;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Staggered fade-in for grid items (50ms delay per item, max 600ms)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _StaggeredFadeIn extends StatefulWidget {
+  const _StaggeredFadeIn({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  State<_StaggeredFadeIn> createState() => _StaggeredFadeInState();
+}
+
+class _StaggeredFadeInState extends State<_StaggeredFadeIn>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fade;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.12),
+      end: Offset.zero,
+    ).animate(_fade);
+
+    final delayMs = (widget.index * 50).clamp(0, 600);
+    Future.delayed(Duration(milliseconds: delayMs), () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(position: _slide, child: widget.child),
+    );
+  }
 }

@@ -197,90 +197,90 @@ class _QuizChallengeSimulationState extends State<QuizChallengeSimulation> {
 
     return Container(
       color: _kNavy,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          const SizedBox(height: 12),
-          _dragHandle(),
-          const SizedBox(height: 44),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            _dragHandle(),
+            const SizedBox(height: 24),
 
-          // Trophy icon
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _kTeal.withValues(alpha: 0.12),
-              border: Border.all(color: _kTeal, width: 2),
-            ),
-            child: const Icon(Icons.emoji_events, color: _kTeal, size: 42),
-          ),
-          const SizedBox(height: 20),
-
-          Text(
-            perfect
-                ? 'Perfect Score! 🎉'
-                : percent >= 70
-                    ? 'Great Work!'
-                    : 'Keep Practising!',
-            style: GoogleFonts.rajdhani(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '$_correctCount of $_totalQuestions correct  ·  $percent%',
-            style: GoogleFonts.inter(fontSize: 15, color: _kSubtext),
-          ),
-          const SizedBox(height: 32),
-
-          // Stat cards row
-          Row(
-            children: [
-              _statCard('🔥', '$_streak', 'Best Streak'),
-              const SizedBox(width: 12),
-              _statCard('⭐', '+$xpEarned XP', 'Earned'),
-              const SizedBox(width: 12),
-              _statCard('🛡️', '$_shields', 'Shields Left'),
-            ],
-          ),
-
-          const Spacer(),
-
-          // Claim reward button
-          GestureDetector(
-            onTap: widget.onComplete,
-            child: Container(
-              width: double.infinity,
-              height: 52,
+            // Trophy icon
+            Container(
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                color: _kTeal,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: _kTeal.withValues(alpha: 0.40),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                shape: BoxShape.circle,
+                color: _kTeal.withValues(alpha: 0.12),
+                border: Border.all(color: _kTeal, width: 2),
               ),
-              child: Center(
-                child: Text(
-                  'Claim Reward',
-                  style: GoogleFonts.rajdhani(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: _kNavy,
-                    letterSpacing: 0.8,
+              child: const Icon(Icons.emoji_events, color: _kTeal, size: 38),
+            ),
+            const SizedBox(height: 16),
+
+            Text(
+              perfect
+                  ? 'Perfect Score! 🎉'
+                  : percent >= 70
+                      ? 'Great Work!'
+                      : 'Keep Practising!',
+              style: GoogleFonts.rajdhani(
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '$_correctCount of $_totalQuestions correct  ·  $percent%',
+              style: GoogleFonts.inter(fontSize: 14, color: _kSubtext),
+            ),
+            const SizedBox(height: 20),
+
+            // Stat cards row
+            Row(
+              children: [
+                _statCard('🔥', '$_streak', 'Best Streak'),
+                const SizedBox(width: 12),
+                _statCard('⭐', '+$xpEarned XP', 'Earned'),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Claim reward button
+            GestureDetector(
+              onTap: widget.onComplete,
+              child: Container(
+                width: double.infinity,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: _kTeal,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _kTeal.withValues(alpha: 0.40),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    'Claim Reward',
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: _kNavy,
+                      letterSpacing: 0.8,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 28),
-        ],
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -425,42 +425,6 @@ class _QuizChallengeSimulationState extends State<QuizChallengeSimulation> {
             ),
           ),
 
-          // Vertical divider
-          Container(
-            width: 1,
-            height: 36,
-            color: Colors.white.withValues(alpha: 0.12),
-          ),
-
-          // Shields
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.shield, color: _kTeal, size: 24),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$_shields',
-                      style: GoogleFonts.rajdhani(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: _kTeal,
-                      ),
-                    ),
-                    Text(
-                      'shields',
-                      style:
-                          GoogleFonts.inter(fontSize: 11, color: _kSubtext),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/features/auth/models/user_profile.dart';
+import '../../xp_boost/providers/xp_boost_provider.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Auth State
@@ -66,7 +67,9 @@ class AuthState {
 /// [AuthNotifier] owns all authentication logic.
 /// No auth logic lives inside any widget build method.
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(const AuthState()) {
+  final Ref _ref;
+
+  AuthNotifier(this._ref) : super(const AuthState()) {
     _restoreSession();
   }
 
@@ -156,6 +159,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       // Update streak
       _updateStreak(user);
+
+      // One-time correction: clamp walletBalance to 0 if it somehow went negative
+      if (user.walletBalance < 0) {
+        user.walletBalance = 0;
+        await user.save();
+      }
 
       state = AuthState(currentUser: user);
     } catch (e) {
@@ -311,13 +320,58 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Awards [amount] XP to the current user and persists the change.
+  /// Applies a 2× multiplier when an XP boost is active.
   /// Called by the Daily Challenge system on correct answers.
   Future<void> addXp(int amount) async {
     final user = state.currentUser;
     if (user == null) return;
-    user.addXp(amount);
+    final boostActive = _ref.read(xpBoostProvider).isActive;
+    final multiplier = boostActive ? 2 : 1;
+    user.addXp(amount * multiplier);
     await user.save();
     state = AuthState(currentUser: user);
+  }
+
+  /// Persists the ISO-8601 expiry string for the active XP boost.
+  /// Pass null to clear the boost from the player's profile.
+  Future<void> setXpBoostExpiry(String? iso8601) async {
+    final user = state.currentUser;
+    if (user == null) return;
+    user.xpBoostExpiry = iso8601;
+    await user.save();
+    state = state.copyWith(currentUser: user);
+  }
+
+  /// Sets the player's selected avatar ID and persists the change.
+  Future<void> setAvatarId(String avatarId) async {
+    final user = state.currentUser;
+    if (user == null) return;
+    user.avatarId = avatarId;
+    await user.save();
+    state = state.copyWith(currentUser: user);
+  }
+
+  /// Credits [amount] ZamCoins to the current user's wallet and persists.
+  /// Clamps the result to [0, 999999999] to prevent negative balances.
+  Future<void> addWalletCoins(int amount) async {
+    final user = state.currentUser;
+    if (user == null) return;
+    user.walletBalance = (user.walletBalance + amount).clamp(0, 999999999);
+    await user.save();
+    state = state.copyWith(currentUser: user);
+  }
+
+  /// Debits [amount] ZamCoins from the current user's wallet if funds allow.
+  ///
+  /// Returns `true` on success, `false` when the balance is insufficient.
+  Future<bool> spendWalletCoins(int amount) async {
+    final user = state.currentUser;
+    if (user == null) return false;
+    if (user.walletBalance < amount) return false;
+    user.walletBalance -= amount;
+    await user.save();
+    state = state.copyWith(currentUser: user);
+    return true;
   }
 }
 
@@ -327,7 +381,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 /// Global [StateNotifierProvider] for authentication state.
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier();
+  return AuthNotifier(ref);
 });
 
 /// Convenience provider — returns the current [UserProfile] or null.

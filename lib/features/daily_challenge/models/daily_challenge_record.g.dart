@@ -1,6 +1,4 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// Hand-written TypeAdapter following the same pattern as user_profile.g.dart.
-// typeId 3 — DailyChallengeRecord (6 fields, indices 0–5)
 
 part of 'daily_challenge_record.dart';
 

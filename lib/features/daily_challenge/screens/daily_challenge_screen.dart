@@ -15,6 +15,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/core/router.dart';
 import 'package:zamwealth_quest/features/daily_challenge/models/challenge.dart';
+import 'package:zamwealth_quest/features/daily_challenge/models/daily_challenge_record.dart';
 import 'package:zamwealth_quest/features/daily_challenge/providers/daily_challenge_provider.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -42,20 +43,42 @@ class DailyChallengeScreen extends ConsumerStatefulWidget {
       _DailyChallengeScreenState();
 }
 
-class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
+class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen>
+    with SingleTickerProviderStateMixin {
   int? _selectedIndex;
   final TextEditingController _numericController = TextEditingController();
+
+  // Screen entry animation (fade + slide-up 20 px, 300 ms easeOut).
+  late final AnimationController _entryCtrl;
+  late final Animation<double> _fadeAnim;
+  late final Animation<Offset> _slideAnim;
+
+  // Tap-feedback scale for the confirm button (80–120 ms).
+  bool _confirmDown = false;
 
   @override
   void initState() {
     super.initState();
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _fadeAnim = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.05), // ~20 px from the top
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut));
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _entryCtrl.forward();
       ref.read(dailyChallengeProvider.notifier).getTodaysChallenge();
     });
   }
 
   @override
   void dispose() {
+    _entryCtrl.dispose();
     _numericController.dispose();
     super.dispose();
   }
@@ -115,8 +138,17 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
             ? const Center(
                 child: CircularProgressIndicator(color: _kNeonMint),
               )
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+            : FadeTransition(
+                opacity: _fadeAnim,
+                child: SlideTransition(
+                position: _slideAnim,
+                child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: MediaQuery.of(context).padding.bottom + 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -167,6 +199,8 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
                     const SizedBox(height: 24),
                   ],
                 ),
+                ),
+                ),
               ),
       ),
     );
@@ -174,7 +208,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
 
   // ── Stat bar ───────────────────────────────────────────────────────────────
 
-  Widget _buildStatBar(record) {
+  Widget _buildStatBar(DailyChallengeRecord? record) {
     final streak = record?.currentStreak ?? 0;
     final shields = record?.streakShields ?? 0;
     final total = record?.totalCompleted ?? 0;
@@ -341,7 +375,7 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
     return Column(
       children: List.generate(challenge.options.length, (i) {
         final selected = _selectedIndex == i;
-        return GestureDetector(
+        return _TappableScale(
           onTap: () => setState(() => _selectedIndex = i),
           child: Container(
             margin: const EdgeInsets.only(bottom: 10),
@@ -469,34 +503,53 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
   Widget _buildConfirmButton(DailyChallenge challenge) {
     final enabled = _canSubmit(challenge);
     return GestureDetector(
-      onTap: enabled ? () => _submit(challenge) : null,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          color: enabled
-              ? _kPrimaryBlue
-              : Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: enabled
-              ? [
-                  BoxShadow(
-                    color: _kPrimaryBlue.withValues(alpha: 0.40),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
-        ),
-        child: Center(
-          child: Text(
-            'Confirm Answer',
-            style: GoogleFonts.rajdhani(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: enabled
-                  ? Colors.white
-                  : _kSoftGray.withValues(alpha: 0.40),
-              letterSpacing: 0.5,
+      onTapDown: enabled ? (_) => setState(() => _confirmDown = true) : null,
+      onTapCancel: enabled ? () => setState(() => _confirmDown = false) : null,
+      onTapUp: enabled
+          ? (_) {
+              setState(() => _confirmDown = false);
+              _submit(challenge);
+            }
+          : null,
+      child: AnimatedScale(
+        scale: _confirmDown ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        child: Container(
+          height: 52,
+          decoration: BoxDecoration(
+            color: enabled
+                ? _kPrimaryBlue
+                : Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: enabled
+                ? [
+                    // Duolingo-style 3D bottom shadow (darker shade, 4 px down).
+                    BoxShadow(
+                      color: const Color(0xFF0D47A1)
+                          .withValues(alpha: 0.55),
+                      offset: const Offset(0, 4),
+                      blurRadius: 0,
+                    ),
+                    BoxShadow(
+                      color: _kPrimaryBlue.withValues(alpha: 0.30),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                : const [],
+          ),
+          child: Center(
+            child: Text(
+              'Confirm Answer',
+              style: GoogleFonts.rajdhani(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: enabled
+                    ? Colors.white
+                    : _kSoftGray.withValues(alpha: 0.40),
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ),
@@ -511,6 +564,9 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
     DailyChallenge challenge,
   ) {
     final correct = dcState.isCorrect;
+    final shieldUsed = dcState.shieldUsed;
+    final streakReset = dcState.streakReset;
+    final shieldsLeft = dcState.record?.streakShields ?? 0;
 
     final String correctLabel;
     if (challenge.type == ChallengeType.numeric) {
@@ -529,12 +585,14 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
         border: Border.all(
           color: correct
               ? _kFreshGreen.withValues(alpha: 0.50)
-              : _kError.withValues(alpha: 0.50),
+              : shieldUsed
+                  ? _kGold.withValues(alpha: 0.60)
+                  : _kError.withValues(alpha: 0.50),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: (correct ? _kFreshGreen : _kError)
+            color: (correct ? _kFreshGreen : shieldUsed ? _kGold : _kError)
                 .withValues(alpha: 0.12),
             blurRadius: 16,
           ),
@@ -546,17 +604,27 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
           Row(
             children: [
               Text(
-                correct ? '✅' : '❌',
+                correct ? '✅' : shieldUsed ? '🛡️' : '❌',
                 style: const TextStyle(fontSize: 26),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  correct ? 'Correct!' : 'Not quite!',
+                  correct
+                      ? 'Correct!'
+                      : shieldUsed
+                          ? 'Shield saved your streak!'
+                          : streakReset
+                              ? 'Streak lost!'
+                              : 'Not quite!',
                   style: GoogleFonts.rajdhani(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: correct ? _kFreshGreen : _kError,
+                    color: correct
+                        ? _kFreshGreen
+                        : shieldUsed
+                            ? _kGold
+                            : _kError,
                   ),
                 ),
               ),
@@ -571,6 +639,65 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
                 ),
             ],
           ),
+
+          // Shield used feedback
+          if (shieldUsed) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: _kGold.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: _kGold.withValues(alpha: 0.40)),
+              ),
+              child: Row(
+                children: [
+                  const Text('🛡️', style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'A Streak Shield was used to protect your streak! $shieldsLeft shield${shieldsLeft == 1 ? '' : 's'} remaining.',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: _kGold,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // Streak reset feedback
+          if (streakReset) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: _kError.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: _kError.withValues(alpha: 0.30)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded,
+                      color: _kError, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Your streak has been reset. Earn shields by completing challenges 7 days in a row!',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: _kError,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           if (!correct) ...[
             const SizedBox(height: 12),
             Container(
@@ -643,12 +770,14 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
             children: [
               const Text('✅', style: TextStyle(fontSize: 26)),
               const SizedBox(width: 12),
-              Text(
-                'Challenge Complete!',
-                style: GoogleFonts.rajdhani(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: _kFreshGreen,
+              Expanded(
+                child: Text(
+                  'Challenge Complete!',
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: _kFreshGreen,
+                  ),
                 ),
               ),
             ],
@@ -680,18 +809,24 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
   // ── Back to Dashboard button ───────────────────────────────────────────────
 
   Widget _buildBackButton(BuildContext context) {
-    return GestureDetector(
+    return _TappableScale(
       onTap: () => context.go(AppRoutes.home),
       child: Container(
-        height: 52,
+        constraints: const BoxConstraints(minHeight: 52),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           color: _kPrimaryBlue,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: _kPrimaryBlue.withValues(alpha: 0.40),
-              blurRadius: 12,
+              color: const Color(0xFF0D47A1).withValues(alpha: 0.55),
               offset: const Offset(0, 4),
+              blurRadius: 0,
+            ),
+            BoxShadow(
+              color: _kPrimaryBlue.withValues(alpha: 0.30),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -706,6 +841,43 @@ class _DailyChallengeScreenState extends ConsumerState<DailyChallengeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tappable AnimatedScale wrapper (80–120 ms scale-down 0.96 → 1.0).
+// Used for tap feedback on GestureDetector-based buttons.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _TappableScale extends StatefulWidget {
+  const _TappableScale({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_TappableScale> createState() => _TappableScaleState();
+}
+
+class _TappableScaleState extends State<_TappableScale> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _down = true),
+      onTapCancel: () => setState(() => _down = false),
+      onTapUp: (_) {
+        setState(() => _down = false);
+        widget.onTap();
+      },
+      child: AnimatedScale(
+        scale: _down ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        child: widget.child,
       ),
     );
   }

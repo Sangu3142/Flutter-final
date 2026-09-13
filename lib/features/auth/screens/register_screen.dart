@@ -1,4 +1,4 @@
-/// register_screen.dart
+﻿/// register_screen.dart
 /// Purpose: Registration screen — collects name, username, and password,
 ///          creates a new UserProfile in Hive, then routes to onboarding.
 /// Reads from: authProvider
@@ -121,11 +121,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         // Display Name
                         TextFormField(
                           controller: _nameCtrl,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: kCharcoal),
                           decoration: InputDecoration(
                             labelText: 'Your Name',
                             hintText: 'e.g. Chanda',
-                            prefixIcon: Icon(Icons.badge_outlined, color: kNeonMint.withValues(alpha: 0.70), size: 20),
+                            prefixIcon: Icon(Icons.badge_outlined,
+                                color: kNeonMint.withValues(alpha: 0.70),
+                                size: 20),
                           ),
                           textInputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.words,
@@ -145,11 +150,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         // Username
                         TextFormField(
                           controller: _usernameCtrl,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: kCharcoal),
                           decoration: InputDecoration(
                             labelText: 'Username',
                             hintText: 'e.g. chanda_mw (min 3 chars)',
-                            prefixIcon: Icon(Icons.alternate_email, color: kNeonMint.withValues(alpha: 0.70), size: 20),
+                            prefixIcon: Icon(Icons.alternate_email,
+                                color: kNeonMint.withValues(alpha: 0.70),
+                                size: 20),
                           ),
                           textInputAction: TextInputAction.next,
                           autocorrect: false,
@@ -160,7 +170,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             if (v.trim().length < 3) {
                               return 'Username must be at least 3 characters';
                             }
-                            if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(v.trim())) {
+                            if (!RegExp(r'^[a-zA-Z0-9_]+$')
+                                .hasMatch(v.trim())) {
                               return 'Only letters, numbers, and underscores';
                             }
                             return null;
@@ -173,24 +184,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         TextFormField(
                           controller: _passwordCtrl,
                           obscureText: _obscurePassword,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: kCharcoal),
                           decoration: InputDecoration(
                             labelText: 'Password',
                             hintText: 'Min 6 characters',
-                            prefixIcon: Icon(Icons.lock_outline, color: kNeonMint.withValues(alpha: 0.70), size: 20),
+                            prefixIcon: Icon(Icons.lock_outline,
+                                color: kNeonMint.withValues(alpha: 0.70),
+                                size: 20),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
                                 color: kCharcoalLight,
                                 size: 20,
                               ),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
                             ),
                           ),
                           textInputAction: TextInputAction.next,
                           validator: (v) {
-                            if (v == null || v.isEmpty) return 'Please create a password';
-                            if (v.length < 6) return 'Password must be at least 6 characters';
+                            if (v == null || v.isEmpty) {
+                              return 'Please create a password';
+                            }
+                            if (v.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
                             return null;
                           },
                         ),
@@ -201,23 +224,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         TextFormField(
                           controller: _confirmCtrl,
                           obscureText: _obscureConfirm,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kCharcoal),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: kCharcoal),
                           decoration: InputDecoration(
                             labelText: 'Confirm Password',
-                            prefixIcon: Icon(Icons.lock_outline, color: kNeonMint.withValues(alpha: 0.70), size: 20),
+                            prefixIcon: Icon(Icons.lock_outline,
+                                color: kNeonMint.withValues(alpha: 0.70),
+                                size: 20),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                _obscureConfirm
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
                                 color: kCharcoalLight,
                                 size: 20,
                               ),
-                              onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                              onPressed: () => setState(
+                                  () => _obscureConfirm = !_obscureConfirm),
                             ),
                           ),
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _submit(),
                           validator: (v) {
-                            if (v != _passwordCtrl.text) return 'Passwords do not match';
+                            if (v != _passwordCtrl.text) {
+                              return 'Passwords do not match';
+                            }
                             return null;
                           },
                         ),

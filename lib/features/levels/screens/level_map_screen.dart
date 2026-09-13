@@ -1,429 +1,228 @@
 /// level_map_screen.dart
-/// Purpose: Vertical level map — premium dark fintech game aesthetic. Shows
-///          4 level cards with connecting dashed lines, a HUD header banner,
-///          and unlocked/locked state styling.
+/// Purpose: Animated adventure map — CustomPainter path with confetti on unlock.
 /// Reads from: levelProvider, authProvider
 /// Writes to: nothing (navigation triggers state changes elsewhere)
-/// Navigation: → /levels/:levelId (unlocked), → /payment/:levelId (locked)
+/// Navigation: → /levels/:levelId
 library;
 
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:confetti/confetti.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:zamwealth_quest/core/constants.dart';
-import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
-import 'package:zamwealth_quest/features/levels/providers/level_provider.dart';
-import 'package:zamwealth_quest/features/levels/models/level_model.dart';
-import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
-import 'package:zamwealth_quest/shared/widgets/offline_banner.dart';
+import '../providers/level_provider.dart';
+import '../widgets/map_painter.dart';
+import '../widgets/zone_node_widget.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../wallet/widgets/wallet_badge.dart';
+import '../../../core/constants.dart';
+import '../../../core/theme.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Palette constants
-// ─────────────────────────────────────────────────────────────────────────────
-
-const Color _kDeepNavy = Color(0xFF0D1B2A);
-const Color _kPrimaryBlue = Color(0xFF1A73E8);
-const Color _kNeonMint = Color(0xFF36ECDE);
-const Color _kFreshGreen = Color(0xFF2BC48A);
-const Color _kSoftGray = Color(0xFFE6E9EC);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// LevelMapScreen
-// ─────────────────────────────────────────────────────────────────────────────
-
-class LevelMapScreen extends ConsumerWidget {
+class LevelMapScreen extends ConsumerStatefulWidget {
   const LevelMapScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final levelState = ref.watch(levelProvider);
+  ConsumerState<LevelMapScreen> createState() => _LevelMapScreenState();
+}
+
+class _LevelMapScreenState extends ConsumerState<LevelMapScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pathCtrl;
+  late Animation<double> _pathAnim;
+  late ConfettiController _confettiCtrl;
+  int _prevUnlockedCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pathCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _pathAnim = CurvedAnimation(parent: _pathCtrl, curve: Curves.easeInOut);
+    _confettiCtrl =
+        ConfettiController(duration: const Duration(seconds: 2));
+    _pathCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _pathCtrl.dispose();
+    _confettiCtrl.dispose();
+    super.dispose();
+  }
+
+  int _countUnlocked(Map<int, dynamic> levels) =>
+      levels.values.where((l) => l.status != kStatusLocked).length;
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
-    final totalXp = user?.xp ?? 0;
 
-    return AnimatedGradientBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const OfflineBanner(),
+    // Detect newly unlocked levels via listen — side-effect-free build.
+    ref.listen<LevelState>(levelProvider, (prev, next) {
+      final newCount = _countUnlocked(next.levels);
+      if (_prevUnlockedCount == 0) {
+        _prevUnlockedCount = newCount;
+        return;
+      }
+      if (newCount > _prevUnlockedCount) {
+        _confettiCtrl.play();
+        _pathCtrl.forward(from: 0);
+      }
+      _prevUnlockedCount = newCount;
+    });
 
-                // ── HUD header banner ──────────────────────────────────────
-                _buildHudBanner(context, totalXp),
-                const SizedBox(height: 24),
+    final levelState = ref.watch(levelProvider);
+    final levelStates = levelState.levels;
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    if (user == null) {
+      return const Scaffold(
+        backgroundColor: kCoreNavy,
+        body: Center(child: CircularProgressIndicator(color: kNeonMint)),
+      );
+    }
+
+    final unlockedCount = _countUnlocked(levelStates);
+    final pathProgress = (unlockedCount / 4).clamp(0.0, 1.0);
+
+    return Scaffold(
+      backgroundColor: kCoreNavy,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0D1B2A),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          'ADVENTURE MAP',
+          style: GoogleFonts.orbitron(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF36ECDE),
+            letterSpacing: 1.5,
+          ),
+        ),
+        actions: const [WalletBadge(), SizedBox(width: 12)],
+      ),
+      body: FadeTransition(
+        opacity: _pathAnim,
+        child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          LayoutBuilder(
+            builder: (ctx, constraints) {
+              final size =
+                  Size(constraints.maxWidth, constraints.maxHeight);
+              // Responsive map height — at least 720px, scaled up for tall
+              // screens so the snaking path always has room to breathe.
+              final mapHeight = math.max(
+                720.0,
+                MediaQuery.sizeOf(context).height * 1.2,
+              );
+
+              return SingleChildScrollView(
+                reverse: true,
+                child: SizedBox(
+                  width: size.width,
+                  height: mapHeight,
+                  child: Stack(
                     children: [
-                      // ── Section heading ──────────────────────────────────
-                      Text(
-                        'Your Journey',
-                        style: GoogleFonts.rajdhani(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      // Neon Mint underline rule
-                      Container(
-                        width: 40,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          color: _kNeonMint,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tap a level to enter. Locked levels require unlocking.',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: _kSoftGray,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ── Level cards with connectors ──────────────────────
-                      ...List.generate(4, (index) {
-                        final levelId = index + 1;
-                        final meta = kLevelMeta[levelId]!;
-                        final model = levelState.levels[levelId];
-                        final isLocked = model?.isLocked ?? true;
-                        final isCompleted = model?.isCompleted ?? false;
-
-                        return Column(
-                          children: [
-                            _buildLevelCard(
-                              context: context,
-                              levelId: levelId,
-                              meta: meta,
-                              model: model,
-                              isLocked: isLocked,
-                              isCompleted: isCompleted,
-                              onTap: () =>
-                                  _handleNodeTap(context, levelId, model),
+                      Positioned.fill(
+                        child: RepaintBoundary(
+                          child: AnimatedBuilder(
+                            animation: _pathAnim,
+                            builder: (_, __) => CustomPaint(
+                              painter: MapPainter(
+                                pathProgress:
+                                    pathProgress * _pathAnim.value,
+                              ),
                             ),
-                            if (levelId < 4)
-                              _buildConnector(isCompleted: isCompleted),
-                          ],
+                          ),
+                        ),
+                      ),
+                      ...List.generate(4, (i) {
+                        final levelId = i + 1;
+                        final level = levelStates[levelId];
+                        if (level == null) return const SizedBox.shrink();
+
+                        final meta = kLevelMeta[levelId]!;
+                        final fixedPositions = [
+                          Offset(size.width * 0.35 - 36, mapHeight * 0.85 - 36),
+                          Offset(size.width * 0.65 - 36, mapHeight * 0.60 - 36),
+                          Offset(size.width * 0.30 - 36, mapHeight * 0.35 - 36),
+                          Offset(size.width * 0.60 - 36, mapHeight * 0.10 - 36),
+                        ];
+                        final pos = fixedPositions[i];
+
+                        final zoneNode = ZoneNodeWidget(
+                          levelId: levelId,
+                          status: level.status,
+                          name: meta.name,
+                          emoji: meta.emoji,
+                          onTap: () => context.push('/levels/$levelId'),
+                          onLockedTap: () {
+                            final prevLevelId = levelId - 1;
+                            final prevLevel = levelStates[prevLevelId];
+                            final prevComplete = prevLevel != null &&
+                                prevLevel.status == kStatusCompleted;
+                            if (prevComplete) {
+                              context.push('/payment/$levelId');
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Complete ${kLevelMeta[prevLevelId]?.name ?? "the previous level"} first!',
+                                  ),
+                                  backgroundColor: const Color(0xFF1A73E8),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          },
+                        );
+
+                        return Positioned(
+                          left: pos.dx,
+                          top: pos.dy,
+                          child: Column(
+                            children: [
+                              zoneNode,
+                              const SizedBox(height: 4),
+                              SizedBox(
+                                width: 80,
+                                child: Text(
+                                  meta.name,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: kCharcoal,
+                                    fontSize: 10,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         );
                       }),
                     ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
-        ),
-      ),
-    );
-  }
-
-  // ── HUD Banner ───────────────────────────────────────────────────────────────
-
-  Widget _buildHudBanner(BuildContext context, int totalXp) {
-    return Container(
-      height: 90,
-      decoration: BoxDecoration(
-        color: _kDeepNavy,
-        border: Border(
-          left: const BorderSide(color: _kNeonMint, width: 4),
-          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiCtrl,
+              blastDirectionality: BlastDirectionality.explosive,
+              colors: const [kNeonMint, kGold, kGreen, kPrimaryBlue],
+              numberOfParticles: 30,
+            ),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'ZamWealth\nAdventure Map',
-                style: GoogleFonts.rajdhani(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 1.1,
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                const Icon(Icons.bolt, color: _kNeonMint, size: 22),
-                const SizedBox(width: 4),
-                Text(
-                  '$totalXp XP',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: _kNeonMint,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
-
-  // ── Level Card ───────────────────────────────────────────────────────────────
-
-  Widget _buildLevelCard({
-    required BuildContext context,
-    required int levelId,
-    required LevelMeta meta,
-    required LevelModel? model,
-    required bool isLocked,
-    required bool isCompleted,
-    required VoidCallback onTap,
-  }) {
-    final double cardOpacity = isLocked ? 0.6 : 1.0;
-    final Color borderColor = isLocked
-        ? Colors.white.withValues(alpha: 0.08)
-        : _kNeonMint;
-    final double borderWidth = isLocked ? 1.0 : 1.5;
-
-    return Opacity(
-      opacity: cardOpacity,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: _kDeepNavy,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor, width: borderWidth),
-            boxShadow: [
-              if (!isLocked)
-                BoxShadow(
-                  color: _kNeonMint.withValues(alpha: 0.20),
-                  blurRadius: 12,
-                  spreadRadius: 0,
-                ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Icon circle
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: _kDeepNavy,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isLocked
-                        ? Colors.white.withValues(alpha: 0.20)
-                        : _kNeonMint,
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: isLocked
-                      ? const Icon(Icons.lock_outline,
-                          color: _kSoftGray, size: 22)
-                      : isCompleted
-                          ? const Icon(Icons.check_circle,
-                              color: _kFreshGreen, size: 26)
-                          : Text(
-                              '$levelId',
-                              style: GoogleFonts.orbitron(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: _kNeonMint,
-                              ),
-                            ),
-                ),
-              ),
-
-              const SizedBox(width: 14),
-
-              // Level info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      meta.name,
-                      style: GoogleFonts.rajdhani(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: isLocked ? _kSoftGray : Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      meta.subtitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: _kSoftGray,
-                        height: 1.4,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    // Pill badges row
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        // Price / FREE pill
-                        _pill(
-                          label: meta.isFree
-                              ? 'FREE'
-                              : 'ZMW ${_levelPrice(levelId).toStringAsFixed(0)}',
-                          bgColor: meta.isFree
-                              ? _kFreshGreen
-                              : _kPrimaryBlue,
-                          textColor: Colors.white,
-                        ),
-                        // XP pill
-                        _pill(
-                          label: '⚡ ${meta.xpReward} XP',
-                          bgColor: _kDeepNavy,
-                          textColor: _kNeonMint,
-                          border: _kNeonMint.withValues(alpha: 0.4),
-                        ),
-                        // Simulations count pill
-                        _pill(
-                          label: '${meta.simulations.length} Sims',
-                          bgColor: _kSoftGray.withValues(alpha: 0.15),
-                          textColor: Colors.white,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 8),
-              Icon(
-                isLocked ? Icons.lock_outline : Icons.chevron_right,
-                color: isLocked ? _kSoftGray : _kNeonMint,
-                size: 20,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _pill({
-    required String label,
-    required Color bgColor,
-    required Color textColor,
-    Color? border,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(20),
-        border: border != null ? Border.all(color: border, width: 1) : null,
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.rajdhani(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: textColor,
-        ),
-      ),
-    );
-  }
-
-  // ── Dashed connector between level cards ──────────────────────────────────────
-
-  Widget _buildConnector({required bool isCompleted}) {
-    return SizedBox(
-      height: 32,
-      child: Center(
-        child: CustomPaint(
-          size: const Size(2, 32),
-          painter: _DashedLinePainter(
-            color: _kNeonMint.withValues(alpha: isCompleted ? 0.7 : 0.4),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Navigation ───────────────────────────────────────────────────────────────
-
-  void _handleNodeTap(BuildContext context, int levelId, LevelModel? model) {
-    if (model == null) return;
-    if (model.isLocked) {
-      context.push('/payment/$levelId');
-    } else {
-      context.push('/levels/$levelId');
-    }
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────────
-
-  double _levelPrice(int levelId) {
-    return switch (levelId) {
-      1 => kLevel1Price,
-      2 => kLevel2Price,
-      3 => kLevel3Price,
-      4 => kLevel4Price,
-      _ => 0.0,
-    };
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Dashed Line Painter
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _DashedLinePainter extends CustomPainter {
-  const _DashedLinePainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    const dashHeight = 6.0;
-    const gapHeight = 4.0;
-    final cx = size.width / 2;
-    double y = 0;
-
-    while (y < size.height) {
-      final end = (y + dashHeight).clamp(0.0, size.height);
-      canvas.drawLine(Offset(cx, y), Offset(cx, end), paint);
-      y += dashHeight + gapHeight;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedLinePainter old) =>
-      old.color != color;
 }

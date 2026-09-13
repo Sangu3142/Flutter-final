@@ -88,6 +88,18 @@ class BadgeService {
       if (newStreak >= 7)  _award(user, 'streak_7', context);
       if (newStreak >= 30) _award(user, 'streak_30', context);
     }
+
+    // ── Weekly devotee badge ──────────────────────────────────────────────────
+    if (user.loginBonusDay >= 7 && !user.hasBadge('weekly_devotee')) {
+      _award(user, 'weekly_devotee', context);
+    }
+  }
+
+  /// Directly award a specific badge by ID (used by the story path system).
+  void awardById(String badgeId) {
+    final user = _ref.read(authProvider).currentUser;
+    if (user == null) return;
+    _award(user, badgeId);
   }
 
   void _award(UserProfile user, String badgeId, [BuildContext? context]) {

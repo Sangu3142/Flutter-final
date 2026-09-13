@@ -41,11 +41,22 @@ class UserProfile extends HiveObject {
     this.totalQuizXP = 0,
     List<int>? unlockedChapterIds,
     this.lastSeasonalEventId,
+    this.walletBalance = 0,
+    this.avatarId = 'av_01',
+    Map<dynamic, dynamic>? storyChoicesRaw,
+    this.zamuLevel = 1,
+    this.spinLastDate,
+    this.bonusSpinsAvailable = 0,
+    this.loginBonusDay = 1,
+    this.loginBonusLastDate,
+    this.xpBoostExpiry,
+    this.monthlyChallengeDoneMonth,
   })  : unlockedLevels = unlockedLevels ?? [1],
         badges = badges ?? [],
         earnedBadges = earnedBadges ?? [],
         completedQuizIds = completedQuizIds ?? [],
         unlockedChapterIds = unlockedChapterIds ?? [],
+        storyChoicesRaw = storyChoicesRaw ?? {},
         lastActiveStr = lastActiveStr ?? DateTime.now().toIso8601String();
 
   // ── Identity ──────────────────────────────────────────────────────────────
@@ -139,7 +150,55 @@ class UserProfile extends HiveObject {
   @HiveField(19)
   String? lastSeasonalEventId;
 
+  // ── Gamification / Wallet / Story ─────────────────────────────────────────
+
+  /// In-app wallet balance (coins earned through gameplay).
+  @HiveField(20)
+  int walletBalance;
+
+  /// Avatar asset ID selected by the player (e.g. 'student', 'trader').
+  @HiveField(21)
+  String avatarId;
+
+  /// Raw map of story moment IDs → chosen option index.
+  /// Use the [storyChoices] getter for a typed `Map<String, int>` view.
+  @HiveField(22)
+  Map<dynamic, dynamic> storyChoicesRaw;
+
+  /// The player's current Zamu (mastery) level (1–5).
+  @HiveField(23)
+  int zamuLevel;
+
+  /// ISO-8601 date string of the last spin-the-wheel play.
+  @HiveField(24)
+  String? spinLastDate;
+
+  /// Number of bonus spins available to the player.
+  @HiveField(25)
+  int bonusSpinsAvailable;
+
+  /// Day index within the current login-bonus streak (1-based).
+  @HiveField(26)
+  int loginBonusDay;
+
+  /// ISO-8601 date string of the last login-bonus claim.
+  @HiveField(27)
+  String? loginBonusLastDate;
+
+  /// ISO-8601 datetime string when the active XP boost expires.
+  @HiveField(28)
+  String? xpBoostExpiry;
+
+  /// The calendar month (1–12) in which the monthly challenge was completed,
+  /// encoded as `year * 100 + month` (e.g. 202601 = January 2026).
+  @HiveField(29)
+  int? monthlyChallengeDoneMonth;
+
   // ── Computed Accessors ────────────────────────────────────────────────────
+
+  /// Typed view of [storyChoicesRaw] as `Map<String, int>`.
+  Map<String, int> get storyChoices =>
+      storyChoicesRaw.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
 
   /// Returns [lastActiveStr] as a [DateTime] object.
   DateTime get lastActive => DateTime.parse(lastActiveStr);
@@ -204,6 +263,31 @@ class UserProfile extends HiveObject {
   /// Returns true if [eventId] was completed this calendar month.
   bool hasCompletedSeasonalEvent(String eventId, int year, int month) {
     return lastSeasonalEventId == '${eventId}_${year}_$month';
+  }
+
+  // ── Wallet helpers ────────────────────────────────────────────────────────
+
+  /// Adds [amount] coins to [walletBalance].
+  /// Caller must await user.save() after calling this.
+  void addWalletCoins(int amount) {
+    walletBalance += amount;
+  }
+
+  /// Deducts [amount] coins from [walletBalance].
+  /// Returns `false` (no-op) if the balance is insufficient.
+  /// Caller must await user.save() after a successful call.
+  bool spendWalletCoins(int amount) {
+    if (walletBalance < amount) return false;
+    walletBalance -= amount;
+    return true;
+  }
+
+  // ── Story helpers ─────────────────────────────────────────────────────────
+
+  /// Records the player's choice for a story moment and persists.
+  void recordStoryChoice(String momentId, int choiceIndex) {
+    storyChoicesRaw[momentId] = choiceIndex;
+    save();
   }
 
   @override

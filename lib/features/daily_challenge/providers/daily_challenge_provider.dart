@@ -17,6 +17,8 @@ import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
 import 'package:zamwealth_quest/features/badges/providers/badge_provider.dart';
 import 'package:zamwealth_quest/features/daily_challenge/models/challenge.dart';
 import 'package:zamwealth_quest/features/daily_challenge/models/daily_challenge_record.dart';
+import 'package:zamwealth_quest/features/streak/providers/streak_provider.dart';
+import 'package:zamwealth_quest/services/streak_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // State
@@ -30,6 +32,8 @@ class DailyChallengeState {
     this.isLoading = false,
     this.isAnswered = false,
     this.isCorrect = false,
+    this.shieldUsed = false,
+    this.streakReset = false,
     this.selectedAnswer,
     this.selectedIndex,
   });
@@ -49,6 +53,12 @@ class DailyChallengeState {
   /// Whether the submitted answer was correct.
   final bool isCorrect;
 
+  /// True if a Streak Shield was auto-consumed to protect the streak this attempt.
+  final bool shieldUsed;
+
+  /// True if the streak was reset to zero (wrong answer, no shields left).
+  final bool streakReset;
+
   /// String representation of the submitted answer (for display in results).
   final String? selectedAnswer;
 
@@ -61,6 +71,8 @@ class DailyChallengeState {
     bool? isLoading,
     bool? isAnswered,
     bool? isCorrect,
+    bool? shieldUsed,
+    bool? streakReset,
     String? selectedAnswer,
     int? selectedIndex,
   }) {
@@ -70,6 +82,8 @@ class DailyChallengeState {
       isLoading: isLoading ?? this.isLoading,
       isAnswered: isAnswered ?? this.isAnswered,
       isCorrect: isCorrect ?? this.isCorrect,
+      shieldUsed: shieldUsed ?? this.shieldUsed,
+      streakReset: streakReset ?? this.streakReset,
       selectedAnswer: selectedAnswer ?? this.selectedAnswer,
       selectedIndex: selectedIndex ?? this.selectedIndex,
     );
@@ -184,6 +198,9 @@ class DailyChallengeNotifier extends StateNotifier<DailyChallengeState> {
     }
 
     // ── Award XP and update record on correct answer ──────────────────────
+    bool shieldUsed = false;
+    bool streakReset = false;
+
     if (isCorrect) {
       await _ref.read(authProvider.notifier).addXp(kDailyChallengeXp);
 
@@ -210,12 +227,31 @@ class DailyChallengeNotifier extends StateNotifier<DailyChallengeState> {
         newStreak: record.currentStreak,
         newXp: _ref.read(authProvider).currentUser?.xp,
       );
+
+      // Global streak — record cross-feature activity.
+      final uid = _ref.read(currentUserProvider)?.uid;
+      if (uid != null) {
+        await StreakService.recordActivity(uid);
+        _ref.read(globalStreakProvider.notifier).refresh();
+      }
+    } else {
+      // Wrong answer — shields protect the streak; no shields means reset.
+      if (record.streakShields > 0) {
+        record.streakShields -= 1;
+        shieldUsed = true;
+      } else if (record.currentStreak > 0) {
+        record.currentStreak = 0;
+        streakReset = true;
+      }
+      await record.save();
     }
 
     state = state.copyWith(
       record: record,
       isAnswered: true,
       isCorrect: isCorrect,
+      shieldUsed: shieldUsed,
+      streakReset: streakReset,
       selectedAnswer: answer.toString(),
       selectedIndex: challenge.type != ChallengeType.numeric ? answer as int : null,
     );
@@ -246,4 +282,11 @@ final dailyChallengeProvider =
   });
 
   return notifier;
+});
+
+/// Single source of truth for the player's daily-challenge streak.
+/// Both home header and profile stats row watch this provider so they
+/// always show the same value.
+final streakProvider = Provider<int>((ref) {
+  return ref.watch(dailyChallengeProvider).record?.currentStreak ?? 0;
 });

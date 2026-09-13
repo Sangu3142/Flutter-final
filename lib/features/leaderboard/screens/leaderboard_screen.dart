@@ -13,6 +13,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
+import 'package:zamwealth_quest/features/avatar/models/avatar_config.dart';
+import 'package:zamwealth_quest/features/avatar/widgets/avatar_painter.dart';
 import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -30,19 +32,55 @@ const Color _kSoftGray = Color(0xFFE6E9EC);
 // LeaderboardScreen
 // ─────────────────────────────────────────────────────────────────────────────
 
-class LeaderboardScreen extends ConsumerWidget {
+class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LeaderboardScreen> createState() => _LeaderboardScreenState();
+}
+
+class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _entryCtrl;
+  late final Animation<double> _entryFade;
+  late final Animation<Offset> _entrySlide;
+
+  @override
+  void initState() {
+    super.initState();
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _entryFade = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
+    _entrySlide = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut));
+    _entryCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _entryCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
-    final entries =
-        _buildEntries(user?.uid ?? '', user?.xp ?? 0, user?.name ?? 'You');
+    final entries = _buildEntries(
+        user?.uid ?? '', user?.xp ?? 0, user?.name ?? 'You',
+        user?.avatarId ?? 'av_01');
 
     return AnimatedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: SafeArea(
+        body: FadeTransition(
+          opacity: _entryFade,
+          child: SlideTransition(
+            position: _entrySlide,
+            child: SafeArea(
           child: OrientationBuilder(
             builder: (context, orientation) {
               final isLandscape = orientation == Orientation.landscape;
@@ -60,9 +98,13 @@ class LeaderboardScreen extends ConsumerWidget {
                   // ── Full List ──────────────────────────────────────────
                   Expanded(
                     child: ListView.separated(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: isLandscape ? 4 : 8,
+                      cacheExtent: 200,
+                      padding: EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        top: isLandscape ? 4 : 8,
+                        bottom: MediaQuery.of(context).padding.bottom +
+                            (isLandscape ? 4 : 16),
                       ),
                       itemCount: entries.length,
                       separatorBuilder: (_, __) => SizedBox(
@@ -98,6 +140,8 @@ class LeaderboardScreen extends ConsumerWidget {
                 ],
               );
             },
+          ),
+        ),
           ),
         ),
       ),
@@ -137,7 +181,8 @@ class LeaderboardScreen extends ConsumerWidget {
   // ── Build Sorted Entries ──────────────────────────────────────────────────
 
   List<Map<String, dynamic>> _buildEntries(
-      String uid, int userXp, String userName) {
+      String uid, int userXp, String userName, String userAvatarId) {
+    final avatarIds = kAvatarConfigs.map((c) => c.id).toList();
     try {
       final box = Hive.box(kLeaderboardBox);
       final rawEntries = (box.get('entries') as List? ?? []).cast<Map>();
@@ -145,11 +190,13 @@ class LeaderboardScreen extends ConsumerWidget {
       final entries = <Map<String, dynamic>>[];
 
       for (final e in rawEntries) {
+        final name = e['name'] as String? ?? 'Player';
         entries.add({
-          'name': e['name'] as String? ?? 'Player',
+          'name': name,
           'xp': (e['xp'] as int? ?? 0),
           'badge': e['badge'] as String? ?? 'budget_master',
           'isCurrentUser': false,
+          'avatarId': avatarIds[name.codeUnitAt(0) % avatarIds.length],
         });
       }
 
@@ -158,6 +205,7 @@ class LeaderboardScreen extends ConsumerWidget {
         'xp': userXp,
         'badge': 'savings_star',
         'isCurrentUser': true,
+        'avatarId': userAvatarId,
       });
 
       entries.sort((a, b) => (b['xp'] as int).compareTo(a['xp'] as int));
@@ -169,6 +217,7 @@ class LeaderboardScreen extends ConsumerWidget {
           'xp': userXp,
           'badge': 'savings_star',
           'isCurrentUser': true,
+          'avatarId': userAvatarId,
         }
       ];
     }
@@ -332,19 +381,9 @@ class LeaderboardScreen extends ConsumerWidget {
           const SizedBox(width: 10),
 
           // Avatar
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: isCurrentUser
-                ? _kNeonMint.withValues(alpha: 0.15)
-                : Colors.white.withValues(alpha: 0.08),
-            child: Text(
-              (entry['name'] as String)[0].toUpperCase(),
-              style: GoogleFonts.orbitron(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isCurrentUser ? _kNeonMint : _kSoftGray,
-              ),
-            ),
+          AvatarWidget(
+            avatarId: entry['avatarId'] as String? ?? 'av_01',
+            size: 40,
           ),
 
           const SizedBox(width: 12),
@@ -356,12 +395,16 @@ class LeaderboardScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      entry['name'] as String,
-                      style: GoogleFonts.rajdhani(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: isCurrentUser ? _kNeonMint : _kSoftGray,
+                    Flexible(
+                      child: Text(
+                        entry['name'] as String,
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: isCurrentUser ? _kNeonMint : _kSoftGray,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                     if (isCurrentUser) ...[

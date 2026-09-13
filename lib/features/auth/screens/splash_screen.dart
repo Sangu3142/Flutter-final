@@ -80,89 +80,114 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       body: Container(
         decoration: const BoxDecoration(gradient: kZamGradient),
         child: SafeArea(
-          child: Center(
-            child: FadeTransition(
-              opacity: _fadeAnim,
-              child: ScaleTransition(
-                scale: _scaleAnim,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // ── Logo / Icon ──────────────────────────────────────
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          width: 2,
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '🇿🇲',
-                          style: TextStyle(fontSize: 60),
-                        ),
-                      ),
-                    ),
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    MediaQuery.of(context).padding.bottom,
+              ),
+              child: Center(
+                child: FadeTransition(
+                  opacity: _fadeAnim,
+                  child: ScaleTransition(
+                    scale: _scaleAnim,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // ── Logo / Icon ──────────────────────────────────
+                        Builder(builder: (ctx) {
+                          final s = MediaQuery.of(ctx).size;
+                          final logoSize = s.shortestSide * 0.28;
+                          return Container(
+                            width: logoSize,
+                            height: logoSize,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.4),
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '🇿🇲',
+                                style: TextStyle(fontSize: logoSize * 0.5),
+                              ),
+                            ),
+                          );
+                        }),
 
-                    const SizedBox(height: 28),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.03),
 
-                    // ── App Name ─────────────────────────────────────────
-                    Text(
-                      'ZamWealth',
-                      style:
-                          Theme.of(context).textTheme.displayMedium?.copyWith(
+                        // ── App Name ──────────────────────────────────────
+                        Text(
+                          'ZamWealth',
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium
+                              ?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.2,
                               ),
-                    ),
-                    Text(
-                      'QUEST',
-                      style:
-                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        ),
+                        Text(
+                          'QUEST',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
                                 color: kGold,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 6,
                               ),
-                    ),
+                        ),
 
-                    const SizedBox(height: 12),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.015),
 
-                    // ── Tagline ──────────────────────────────────────────
-                    Text(
-                      'Level up your financial future',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            letterSpacing: 0.5,
+                        // ── Tagline ────────────────────────────────────────
+                        Text(
+                          'Level up your financial future',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.85),
+                                    letterSpacing: 0.5,
+                                  ),
+                        ),
+
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.07),
+
+                        // ── Loading Indicator ──────────────────────────────
+                        SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            strokeWidth: 2.5,
                           ),
+                        ),
+
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.05),
+
+                        // ── Powered By ─────────────────────────────────────
+                        Text(
+                          'Powered by Zambian financial data 🏦',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.6),
+                                  ),
+                        ),
+                      ],
                     ),
-
-                    const SizedBox(height: 60),
-
-                    // ── Loading Indicator ────────────────────────────────
-                    SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CircularProgressIndicator(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        strokeWidth: 2.5,
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-
-                    // ── Powered By ───────────────────────────────────────
-                    Text(
-                      'Powered by Zambian financial data 🏦',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.6),
-                          ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

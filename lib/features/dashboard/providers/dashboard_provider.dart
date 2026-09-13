@@ -54,9 +54,9 @@ class DashboardState {
   int get zamCoins => user.zamCoins;
   int get streak => user.streak;
   int get currentLevel => user.currentLevel;
-  int get badgeCount => user.badges.length;
+  int get badgeCount => user.earnedBadges.length;
   double get totalSavingsZMW => user.totalSavingsZMW;
-  List<String> get badges => user.badges;
+  List<String> get badges => user.earnedBadges;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

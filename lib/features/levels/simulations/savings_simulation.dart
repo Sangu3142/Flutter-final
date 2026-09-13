@@ -524,11 +524,14 @@ class _SavingsSimulationState extends State<SavingsSimulation> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 60,
-                        getTitlesWidget: (v, _) => Text(
-                          'ZMW${(v / 1000).toStringAsFixed(0)}K',
-                          style: const TextStyle(
-                              fontSize: 9, color: kCharcoalLight),
-                        ),
+                        getTitlesWidget: (v, meta) {
+                          final label = v >= 1000
+                              ? 'ZMW${(v / 1000).toStringAsFixed(0)}K'
+                              : 'ZMW${v.toStringAsFixed(0)}';
+                          return Text(label,
+                              style: const TextStyle(
+                                  fontSize: 9, color: kCharcoalLight));
+                        },
                       ),
                     ),
                     bottomTitles: AxisTitles(
@@ -653,17 +656,24 @@ class _SavingsSimulationState extends State<SavingsSimulation> {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: kCharcoalLight)),
-          Text(value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: kCopper,
-                    fontWeight: FontWeight.w700,
-                  )),
+          Flexible(
+            child: Text(label,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: kCharcoalLight)),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(value,
+                textAlign: TextAlign.end,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: kCopper,
+                      fontWeight: FontWeight.w700,
+                    )),
+          ),
         ],
       ),
     );

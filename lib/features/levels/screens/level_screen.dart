@@ -189,6 +189,63 @@ class _LevelScreenState extends ConsumerState<LevelScreen>
                         if (model.isCompleted)
                           _buildCompletionBanner(context, meta),
 
+                        if (model.status == kStatusCompleted) ...[
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () => context.go('/levels/${widget.levelId}/boss'),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF1A0A2E), Color(0xFF2D1B69)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: const Color(0xFFFFD700), width: 1.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                                    blurRadius: 12,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  const Text('⚔️', style: TextStyle(fontSize: 36)),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Boss Challenge',
+                                          style: TextStyle(
+                                            color: Color(0xFFFFD700),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          kBossConfigs
+                                              .firstWhere((c) => c.levelId == widget.levelId,
+                                                  orElse: () => kBossConfigs.first)
+                                              .name,
+                                          style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(Icons.chevron_right, color: Color(0xFFFFD700)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+
                         const SizedBox(height: 32),
                       ]),
                     ),
