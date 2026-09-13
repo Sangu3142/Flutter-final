@@ -6,7 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
+import 'package:zamwealth_quest/features/wallet/providers/wallet_provider.dart';
+import 'package:zamwealth_quest/features/story/models/dialogue_moment.dart';
 import 'package:zamwealth_quest/features/story/providers/story_provider.dart';
+import 'package:zamwealth_quest/features/story/widgets/dialogue_choice_card.dart';
 import 'package:zamwealth_quest/shared/painters/story/building_painter.dart';
 import 'package:zamwealth_quest/shared/painters/story/certificate_painter.dart';
 import 'package:zamwealth_quest/shared/painters/story/coins_painter.dart';
@@ -26,63 +29,136 @@ const Color _kGold       = Color(0xFFFFB703);
 const Color _kSoftGray   = Color(0xFFE6E9EC);
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Dialogue moment mapping: chapter key → ordered list of moment IDs
+// ─────────────────────────────────────────────────────────────────────────────
+
+const kChapterDialogueMoments = <String, List<String>>{
+  'chapter_1': ['ch1_m1', 'ch1_m2', 'ch1_m3'],
+  'chapter_2': ['ch2_m1', 'ch2_m2', 'ch2_m3'],
+  'chapter_3': ['ch3_m1', 'ch3_m2', 'ch3_m3'],
+  'chapter_4': ['ch4_m1', 'ch4_m2', 'ch4_m3'],
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // StoryChapterScreen
 // ─────────────────────────────────────────────────────────────────────────────
 
-class StoryChapterScreen extends ConsumerWidget {
+class StoryChapterScreen extends ConsumerStatefulWidget {
   const StoryChapterScreen({super.key, required this.chapterId});
 
   final int chapterId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StoryChapterScreen> createState() => _StoryChapterScreenState();
+}
+
+class _StoryChapterScreenState extends ConsumerState<StoryChapterScreen> {
+  DialogueMoment? _currentMoment;
+  bool _showingDialogue = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tryShowNextDialogue();
+    });
+  }
+
+  void _tryShowNextDialogue() {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    final chapterKey = 'chapter_${widget.chapterId}';
+    final momentIds = kChapterDialogueMoments[chapterKey];
+    if (momentIds == null) return;
+
+    final resolved = user.storyChoicesRaw;
+
+    for (final momentId in momentIds) {
+      if (!resolved.containsKey(momentId)) {
+        final moment = kDialogueMoments[momentId];
+        if (moment != null) {
+          setState(() {
+            _currentMoment = moment;
+            _showingDialogue = true;
+          });
+        }
+        return;
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final chapter = kStoryChapters.firstWhere(
-      (c) => c.chapterId == chapterId,
+      (c) => c.chapterId == widget.chapterId,
       orElse: () => kStoryChapters.first,
     );
     final storyState = ref.watch(storyProvider);
     final user = ref.watch(currentUserProvider);
-    final unlocked = storyState.isUnlocked(chapterId);
-    final playerChoice = storyState.playerChoice(chapterId);
+    final wallet = ref.watch(walletProvider);
+    final unlocked = storyState.isUnlocked(widget.chapterId);
+    final playerChoice = storyState.playerChoice(widget.chapterId);
     final hasChoice = playerChoice != 0;
 
     return AnimatedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Column(
+          child: Stack(
             children: [
-              _buildHeader(context, chapter),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Illustration
-                      _buildIllustration(chapter.illustrationTag),
-                      const SizedBox(height: 20),
+              Column(
+                children: [
+                  _buildHeader(context, chapter),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Illustration
+                          _buildIllustration(chapter.illustrationTag),
+                          const SizedBox(height: 20),
 
-                      if (!unlocked)
-                        _buildUnlockCard(context, ref, chapter, user)
-                      else ...[
-                        // Content
-                        _buildContent(chapter.content),
-                        const SizedBox(height: 24),
+                          if (!unlocked)
+                            _buildUnlockCard(context, ref, chapter, user, wallet)
+                          else ...[
+                            // Content
+                            _buildContent(chapter.content),
+                            const SizedBox(height: 24),
 
-                        // Choice section
-                        _buildChoiceSection(
-                          context: context,
-                          ref: ref,
-                          chapter: chapter,
-                          hasChoice: hasChoice,
-                          playerChoice: playerChoice,
-                        ),
-                      ],
-                    ],
+                            // Choice section
+                            _buildChoiceSection(
+                              context: context,
+                              ref: ref,
+                              chapter: chapter,
+                              hasChoice: hasChoice,
+                              playerChoice: playerChoice,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (_showingDialogue && _currentMoment != null)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black54,
+                    child: Center(
+                      child: DialogueChoiceCard(
+                        moment: _currentMoment!,
+                        onDismiss: () {
+                          setState(() {
+                            _showingDialogue = false;
+                            _currentMoment = null;
+                          });
+                        },
+                      ),
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -197,9 +273,10 @@ class StoryChapterScreen extends ConsumerWidget {
     WidgetRef ref,
     StoryChapterData chapter,
     dynamic user,
+    int wallet,
   ) {
     final hasEnoughXp = (user?.xp ?? 0) >= chapter.xpCost;
-    final hasEnoughCoins = (user?.zamCoins ?? 0) >= chapter.zamCoinCost;
+    final hasEnoughCoins = wallet >= chapter.zamCoinCost;
     final canUnlock = hasEnoughXp && hasEnoughCoins;
 
     return Container(

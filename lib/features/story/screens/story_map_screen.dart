@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
 import 'package:zamwealth_quest/features/story/providers/story_provider.dart';
+import 'package:zamwealth_quest/features/wallet/providers/wallet_provider.dart';
 import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -31,7 +32,9 @@ class StoryMapScreen extends ConsumerWidget {
     final storyState = ref.watch(storyProvider);
     final user = ref.watch(currentUserProvider);
     final userXp = user?.xp ?? 0;
-    final userCoins = user?.zamCoins ?? 0;
+    // Read walletBalance via walletProvider so it stays in sync with the home
+    // screen badge and every other coin display in the app.
+    final userCoins = ref.watch(walletProvider);
 
     return AnimatedGradientBackground(
       child: Scaffold(

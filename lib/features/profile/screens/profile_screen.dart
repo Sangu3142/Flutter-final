@@ -14,10 +14,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:zamwealth_quest/core/constants.dart';
 import 'package:zamwealth_quest/core/router.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
-import 'package:zamwealth_quest/features/daily_challenge/providers/daily_challenge_provider.dart';
+import 'package:zamwealth_quest/features/daily_challenge/providers/daily_challenge_provider.dart' show dailyChallengeProvider, streakProvider;
 import 'package:zamwealth_quest/features/profile/providers/profile_provider.dart';
 import 'package:zamwealth_quest/features/badges/providers/badge_provider.dart';
+import 'package:zamwealth_quest/features/avatar/widgets/avatar_painter.dart';
+import 'package:zamwealth_quest/features/shop/providers/inventory_provider.dart';
+import 'package:zamwealth_quest/features/story/models/dialogue_moment.dart';
 import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
+import 'package:zamwealth_quest/widgets/tutorial_overlay.dart'
+    show kTutorialCompletedKey;
+import 'package:zamwealth_quest/features/proverbs/providers/proverb_provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Palette constants
@@ -40,6 +47,8 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
     final payments = ref.watch(paymentHistoryProvider);
+    final challengeStreak = ref.watch(streakProvider);
+    final inventory = ref.watch(inventoryProvider);
 
     if (user == null) {
       return const Scaffold(
@@ -56,7 +65,8 @@ class ProfileScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Profile header + HUD overlap ───────────────────────────
-              _buildHeaderWithHud(context, ref, user),
+              _buildHeaderWithHud(context, ref, user, challengeStreak,
+                  inventory.activeFrameId, inventory.activeStreakIconId),
 
               // ── Body content ────────────────────────────────────────────
               Padding(
@@ -66,12 +76,75 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     _dailyChallengeStats(context, ref),
                     const SizedBox(height: 16),
-                    _detailsCard(context, user),
+                    _detailsCard(context, user, challengeStreak),
                     const SizedBox(height: 16),
                     _statsNavCard(context),
                     const SizedBox(height: 16),
                     _myBadgesCard(context, ref),
                     const SizedBox(height: 16),
+                    _wisdomBookCard(context, ref),
+                    const SizedBox(height: 16),
+                    // ── Your Story So Far ──────────────────────────────────
+                    Consumer(builder: (ctx, ref, _) {
+                      final storyUser = ref.watch(currentUserProvider);
+                      final storyChoices = (storyUser?.storyChoicesRaw ?? {})
+                          .map((k, v) => MapEntry(k.toString(), v as int));
+                      if (storyChoices.isEmpty) return const SizedBox.shrink();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F2A44),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Your Story So Far',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ...storyChoices.entries.map((e) {
+                                  final moment = kDialogueMoments[e.key];
+                                  if (moment == null) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  final option = moment.options[e.value];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('📌 ',
+                                            style: TextStyle(fontSize: 14)),
+                                        Expanded(
+                                          child: Text(
+                                            option.financialConsequence,
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    }),
                     _paymentHistorySection(context, payments),
                     const SizedBox(height: 16),
                     _settingsSection(context, ref),
@@ -90,7 +163,8 @@ class ProfileScreen extends ConsumerWidget {
 
   // ── Header + HUD overlap ─────────────────────────────────────────────────────
 
-  Widget _buildHeaderWithHud(BuildContext context, WidgetRef ref, user) {
+  Widget _buildHeaderWithHud(BuildContext context, WidgetRef ref, user,
+      int challengeStreak, String? activeFrameId, String? activeStreakIconId) {
     const headerH = 160.0;
     const hudH = 88.0;
     const overlap = 20.0;
@@ -107,20 +181,39 @@ class ProfileScreen extends ConsumerWidget {
             left: 0,
             right: 0,
             height: topPadding + headerH,
-            child: _buildHeader(context, ref, user),
+            child: _buildHeader(context, ref, user, activeFrameId),
           ),
           Positioned(
             top: topPadding + headerH - overlap,
             left: 12,
             right: 12,
-            child: _buildHudBar(user),
+            child: _buildHudBar(user, challengeStreak, activeStreakIconId),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, WidgetRef ref, user) {
+  static Color? _frameColor(String? frameId) {
+    switch (frameId) {
+      case 'gold_frame':   return const Color(0xFFFFD700);
+      case 'copper_frame': return const Color(0xFFB87333);
+      case 'emerald_frame': return const Color(0xFF50C878);
+      default: return null;
+    }
+  }
+
+  static String _streakEmoji(String? iconId) {
+    switch (iconId) {
+      case 'flame_blue':    return '🔵';
+      case 'flame_purple':  return '🟣';
+      case 'flame_rainbow': return '🌈';
+      default: return '🔥';
+    }
+  }
+
+  Widget _buildHeader(BuildContext context, WidgetRef ref, user, String? activeFrameId) {
+    final frameColor = _frameColor(activeFrameId);
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -137,31 +230,40 @@ class ProfileScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Avatar
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _kDeepNavy,
-                  border: Border.all(color: _kNeonMint, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _kNeonMint.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: frameColor != null ? const EdgeInsets.all(3) : EdgeInsets.zero,
+                    decoration: frameColor != null
+                        ? BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: frameColor, width: 3),
+                          )
+                        : null,
+                    child: AvatarWidget(
+                      avatarId: user.avatarId,
+                      auraLevel: user.currentLevel >= 5
+                          ? 2
+                          : user.currentLevel >= 3
+                              ? 1
+                              : 0,
+                      size: 80,
                     ),
                   ),
-                ),
+                  TextButton(
+                    onPressed: () => context.push(AppRoutes.changeAvatar),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      'Change Avatar',
+                      style: TextStyle(color: _kNeonMint, fontSize: 11),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(width: 16),
@@ -246,7 +348,7 @@ class ProfileScreen extends ConsumerWidget {
 
   // ── HUD Stat Bar ─────────────────────────────────────────────────────────────
 
-  Widget _buildHudBar(user) {
+  Widget _buildHudBar(user, int challengeStreak, String? activeStreakIconId) {
     return Container(
       height: 88,
       decoration: BoxDecoration(
@@ -286,7 +388,7 @@ class ProfileScreen extends ConsumerWidget {
           _hudDivider(),
           Expanded(
             child: _hudCell(
-              value: '${user.streak}',
+              value: '${_streakEmoji(activeStreakIconId)} $challengeStreak',
               label: 'STREAK',
             ),
           ),
@@ -425,7 +527,7 @@ class ProfileScreen extends ConsumerWidget {
 
   // ── Profile Details Card ──────────────────────────────────────────────────────
 
-  Widget _detailsCard(BuildContext context, user) {
+  Widget _detailsCard(BuildContext context, user, int challengeStreak) {
     return _sectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,7 +544,7 @@ class ProfileScreen extends ConsumerWidget {
           _detailRow('@${user.username}', 'Username'),
           _detailRow(_incomeLabel(user.incomeCategory), 'Income Type'),
           _detailRow(user.riskAppetite.toUpperCase(), 'Risk Appetite'),
-          _detailRow('${user.streak} days', 'Streak'),
+          _detailRow('$challengeStreak days', 'Streak'),
           _detailRow('${user.financialGoals.length} selected', 'Goals'),
           _detailRow(
             'ZMW ${user.totalSavingsZMW.toStringAsFixed(2)}',
@@ -563,6 +665,36 @@ class ProfileScreen extends ConsumerWidget {
           ],
           const Icon(Icons.chevron_right, color: _kNeonMint, size: 20),
         ],
+      ),
+    );
+  }
+
+  // ── Wisdom Book Nav Card ──────────────────────────────────────────────────────
+
+  Widget _wisdomBookCard(BuildContext context, WidgetRef ref) {
+    // Read from the same provider the Wisdom Book screen uses
+    // (string-ID unlocks stored in the settings box, see proverbs_screen.dart).
+    final unlockState = ref.watch(proverbUnlockProvider);
+    final count = unlockState.unlockedIds.length;
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.proverbs),
+      child: _navCard(
+        label: 'Wisdom Book',
+        icon: Icons.menu_book,
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2D9B8A).withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF2D9B8A).withValues(alpha: 0.4)),
+          ),
+          child: Text(
+            '$count/$kTotalProverbs',
+            style: GoogleFonts.orbitron(
+              fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF2D9B8A),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -704,6 +836,16 @@ class ProfileScreen extends ConsumerWidget {
           icon: Icons.leaderboard,
           label: 'Leaderboard',
           onTap: () => context.push(AppRoutes.leaderboard),
+        ),
+        const SizedBox(height: 8),
+        _settingsItem(
+          icon: Icons.play_circle_outline,
+          label: 'Replay Tutorial',
+          onTap: () async {
+            await Hive.box(kSettingsBox).put(kTutorialCompletedKey, false);
+            if (!context.mounted) return;
+            context.go(AppRoutes.tutorial);
+          },
         ),
         const SizedBox(height: 8),
         _settingsItem(

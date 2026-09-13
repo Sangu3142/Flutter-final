@@ -19,8 +19,8 @@ class StoryChapterProgressAdapter extends TypeAdapter<StoryChapterProgress> {
     return StoryChapterProgress(
       uid: fields[0] as String,
       chapterId: fields[1] as int,
-      isUnlocked: fields[2] as bool? ?? false,
-      playerChoice: fields[3] as int? ?? 0,
+      isUnlocked: fields[2] as bool,
+      playerChoice: fields[3] as int,
       dateUnlockedStr: fields[4] as String?,
     );
   }

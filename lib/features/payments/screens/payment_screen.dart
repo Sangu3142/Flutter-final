@@ -515,69 +515,71 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(color: _kGreen.withValues(alpha: 0.50), width: 1.5),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🎉', style: TextStyle(fontSize: 56)),
-              const SizedBox(height: 12),
-              Text(
-                'Level Unlocked!',
-                style: GoogleFonts.rajdhani(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: _kGreen,
-                  letterSpacing: 0.5,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🎉', style: TextStyle(fontSize: 48)),
+                const SizedBox(height: 10),
+                Text(
+                  'Level Unlocked!',
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: _kGreen,
+                    letterSpacing: 0.5,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '${meta.emoji} ${meta.name}',
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  color: _kSoftGray,
+                const SizedBox(height: 6),
+                Text(
+                  '${meta.emoji} ${meta.name}',
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: _kSoftGray,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: _kGold.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: _kGold.withValues(alpha: 0.35)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('🪙', style: TextStyle(fontSize: 16)),
-                    const SizedBox(width: 6),
-                    Text(
-                      '+$kPaymentBonusZamCoins ZamCoins awarded!',
-                      style: GoogleFonts.orbitron(
-                        fontSize: 12,
-                        color: _kGold,
-                        fontWeight: FontWeight.w700,
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _kGold.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _kGold.withValues(alpha: 0.35)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🪙', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 6),
+                      Text(
+                        '+$kPaymentBonusZamCoins ZamCoins awarded!',
+                        style: GoogleFonts.orbitron(
+                          fontSize: 12,
+                          color: _kGold,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    ref.read(paymentProvider.notifier).reset();
-                    context.go(AppRoutes.levels);
-                  },
-                  child: const Text('GO TO LEVEL MAP →'),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      ref.read(paymentProvider.notifier).reset();
+                      context.go(AppRoutes.levels);
+                    },
+                    child: const Text('GO TO LEVEL MAP →'),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

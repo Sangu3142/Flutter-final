@@ -9,10 +9,9 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:zamwealth_quest/core/router.dart';
 import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
+import 'package:zamwealth_quest/features/avatar/widgets/avatar_selector.dart';
 import 'package:zamwealth_quest/shared/widgets/animated_gradient_background.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -53,6 +52,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String? _selectedIncomeCategory;
   final Set<String> _selectedGoals = {};
   double _riskSlider = 1.0;
+  String _selectedAvatarId = 'av_01';
 
   String get _riskLabel {
     if (_riskSlider < 0.5) return 'low';
@@ -81,7 +81,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return;
     }
 
-    if (_currentPage < 4) {
+    if (_currentPage < 5) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
@@ -101,12 +101,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _finish() async {
+    // Save avatar first, then complete onboarding.
+    // Both emit AuthState. The second emission causes GoRouter's redirect
+    // to fire (onboarding → home) automatically.
+    // Do NOT call context.go afterwards — a second navigation races the
+    // redirect and can leave a blank white frame on first account creation.
+    await ref.read(authProvider.notifier).setAvatarId(_selectedAvatarId);
     await ref.read(authProvider.notifier).completeOnboarding(
           incomeCategory: _selectedIncomeCategory!,
           financialGoals: _selectedGoals.toList(),
           riskAppetite: _riskLabel,
         );
-    if (mounted) context.go(AppRoutes.home);
+    // GoRouter redirect handles navigation to /home automatically.
   }
 
   void _showError(String msg) {
@@ -179,7 +185,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     // Page dot indicators
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (i) {
+                      children: List.generate(6, (i) {
                         final isActive = i == _currentPage;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 250),
@@ -215,6 +221,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     _buildStep1(),
                     _buildStep2(),
                     _buildStep3(),
+                    _buildSlide4(),
                   ],
                 ),
               ),
@@ -241,7 +248,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           foregroundColor: kCoreNavy,
                         ),
                         child: Text(
-                          _currentPage < 4 ? 'NEXT →' : 'START PLAYING 🚀',
+                          _currentPage < 5 ? 'NEXT →' : 'START PLAYING 🚀',
                         ),
                       ),
                     ),
@@ -697,6 +704,44 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // ── Slide 4: Avatar Selection ─────────────────────────────────────────────
+
+  Widget _buildSlide4() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+          child: Column(
+            children: [
+              Text(
+                'Choose Your Character',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: kCharcoal,
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Pick your Zambian financial champion!',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: kCharcoalLight,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: AvatarSelector(
+            selectedAvatarId: _selectedAvatarId,
+            onSelect: (id) => setState(() => _selectedAvatarId = id),
+          ),
+        ),
+      ],
     );
   }
 }
