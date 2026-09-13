@@ -29,6 +29,40 @@ import 'package:zamwealth_quest/features/seasonal/screens/seasonal_event_screen.
 import 'package:zamwealth_quest/features/stats/screens/stats_screen.dart';
 import 'package:zamwealth_quest/features/story/screens/story_chapter_screen.dart';
 import 'package:zamwealth_quest/features/story/screens/story_map_screen.dart';
+import 'package:zamwealth_quest/features/hearts/screens/hearts_depleted_screen.dart';
+import 'package:zamwealth_quest/features/daily_bonus/screens/daily_bonus_screen.dart';
+import 'package:zamwealth_quest/features/daily_bonus/providers/daily_bonus_provider.dart';
+import 'package:zamwealth_quest/features/shop/screens/shop_screen.dart';
+import 'package:zamwealth_quest/features/spin/screens/spin_screen.dart';
+import 'package:zamwealth_quest/features/flash_challenge/screens/flash_challenge_screen.dart';
+import 'package:zamwealth_quest/features/flash_challenge/screens/challenge_expired_screen.dart';
+import 'package:zamwealth_quest/features/mini_games/screens/mini_games_screen.dart';
+import 'package:zamwealth_quest/features/mini_games/screens/budget_blitz_screen.dart';
+import 'package:zamwealth_quest/features/mini_games/screens/investment_flip_screen.dart';
+import 'package:zamwealth_quest/features/mystery_box/screens/mystery_box_screen.dart';
+import '../features/boss/screens/boss_screen.dart';
+import '../features/boss/screens/boss_defeated_screen.dart';
+import '../features/coop/screens/coop_screen.dart';
+import '../features/seasons/screens/season_screen.dart';
+import '../features/family/screens/family_screen.dart';
+import '../features/business/screens/business_screen.dart';
+import '../features/life_events/screens/life_event_screen.dart';
+import '../features/property/screens/property_screen.dart';
+import '../features/portfolio/screens/portfolio_screen.dart';
+import '../features/loans/screens/loans_screen.dart';
+import '../features/savings/screens/savings_screen.dart';
+import '../features/networth/screens/networth_screen.dart';
+import '../features/news/screens/news_screen.dart';
+import '../features/health/screens/health_screen.dart';
+import 'package:zamwealth_quest/features/myths/screens/myth_screen.dart';
+import 'package:zamwealth_quest/features/spotlights/screens/spotlights_screen.dart';
+import 'package:zamwealth_quest/features/spotlights/screens/spotlight_story_screen.dart';
+import 'package:zamwealth_quest/features/mentors/screens/mentors_screen.dart';
+import 'package:zamwealth_quest/features/proverbs/screens/proverbs_screen.dart';
+import 'package:zamwealth_quest/features/daily_routine/screens/daily_routine_screen.dart';
+import '../features/recovery/screens/recovery_plan_screen.dart';
+import '../features/avatar/screens/change_avatar_screen.dart';
+import '../features/tutorial/tutorial_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Route Paths
@@ -67,6 +101,73 @@ class AppRoutes {
   static const String story          = '/story';
   static const String storyChapter   = '/story/chapter/:chapterId';
   static const String seasonalEvent  = '/seasonal-event';
+
+  // Hearts (full screen, outside shell)
+  static const String heartsDepleted = '/hearts-depleted';
+
+  // Daily Bonus (full screen, outside shell)
+  static const String dailyBonus = '/daily-bonus';
+
+  // Shop (full screen, outside shell)
+  static const String shop = '/shop';
+
+  // Spin the Wheel (full screen, outside shell)
+  static const String spin = '/spin';
+
+  // Flash Challenge (full screen, outside shell)
+  static const String flashChallenge = '/flash-challenge';
+  static const String challengeExpired = '/challenge-expired';
+
+  // Mini-Games hub + individual games (full screen, outside shell)
+  static const String miniGames  = '/mini-games';
+  static const String budgetBlitz = '/mini-games/budget-blitz';
+  static const String investFlip  = '/mini-games/invest-flip';
+
+  // Mystery Box (full screen, outside shell)
+  static const String mysteryBox = '/mystery-box';
+
+  // Boss Battles (full screen, outside shell) — Wave 5
+  static const String boss       = '/levels/:levelId/boss';
+  static const String bossDefeat = '/levels/:levelId/boss/defeat';
+
+  // Co-op Mode (full screen, outside shell) — Wave 5
+  static const String coop = '/coop';
+
+  // Seasons (full screen, outside shell) — Wave 5
+  static const String seasons = '/seasons';
+
+  // My Life features (full screen, outside shell)
+  static const String family     = '/family';
+  static const String business   = '/business';
+  static const String lifeEvent  = '/life-event';
+
+  // My Finances features (full screen, outside shell)
+  static const String property  = '/property';
+  static const String portfolio = '/portfolio';
+  static const String loans     = '/loans';
+  static const String savings   = '/savings';
+
+  // Analytics & Visualization features (full screen, outside shell)
+  static const String netWorth = '/networth';
+  static const String news     = '/news';
+  static const String health   = '/health';
+
+  // Educational Content features (full screen, outside shell)
+  static const String myths          = '/myths';
+  static const String spotlights     = '/spotlights';
+  static const String spotlightStory = '/spotlights/story';
+  static const String mentors        = '/mentors';
+  static const String proverbs       = '/proverbs';
+  static const String dailyRoutine   = '/daily';
+
+  // Change Avatar (full screen, outside shell)
+  static const String changeAvatar = '/change-avatar';
+
+  // Recovery Plan (full screen, outside shell)
+  static const String recoveryPlan = '/recovery-plan';
+
+  // Tutorial (full screen, outside shell)
+  static const String tutorial = '/tutorial';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -98,6 +199,14 @@ CustomTransitionPage<void> _fadeSlidePage({
     },
   );
 }
+
+// TODO(wave5): uncomment when BossScreen, BossDefeatedScreen, CoopScreen, SeasonScreen are created
+// Widget _slideFromRight(BuildContext context, Animation<double> animation, Animation<double> _, Widget child) =>
+//     SlideTransition(
+//       position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+//           .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+//       child: child,
+//     );
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Router Notifier
@@ -148,6 +257,15 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (location == AppRoutes.login || location == AppRoutes.onboarding) {
         return AppRoutes.home;
+      }
+
+      // Check if daily bonus should be shown
+      if (isAuth && doneOnboarding) {
+        final bonusState = ref.read(dailyBonusProvider);
+        if (bonusState.shouldShow &&
+            routerState.matchedLocation != AppRoutes.dailyBonus) {
+          return AppRoutes.dailyBonus;
+        }
       }
 
       return null;
@@ -292,6 +410,349 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
 
+      // ── Hearts Depleted (outside shell) ────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.heartsDepleted,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const HeartsDepletedScreen(),
+        ),
+      ),
+
+      // ── Daily Bonus (outside shell) ─────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.dailyBonus,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const DailyBonusScreen(),
+        ),
+      ),
+
+      // ── Shop (outside shell) ────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.shop,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const ShopScreen(),
+        ),
+      ),
+
+      // ── Spin the Wheel (outside shell) ──────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.spin,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const SpinScreen(),
+        ),
+      ),
+
+      // ── Flash Challenge (outside shell) ─────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.flashChallenge,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const FlashChallengeScreen(),
+        ),
+      ),
+
+      // ── Challenge Expired (outside shell) ───────────────────────────────────
+      GoRoute(
+        path: AppRoutes.challengeExpired,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const ChallengeExpiredScreen(),
+        ),
+      ),
+
+      // ── Mini-Games Hub (outside shell) ───────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.miniGames,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const MiniGamesScreen(),
+        ),
+      ),
+
+      // ── Budget Blitz (outside shell) ─────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.budgetBlitz,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const BudgetBlitzScreen(),
+        ),
+      ),
+
+      // ── Investment Flip (outside shell) ──────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.investFlip,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const InvestmentFlipScreen(),
+        ),
+      ),
+
+      // ── Mystery Box (outside shell) ───────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.mysteryBox,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const MysteryBoxScreen(),
+          transitionsBuilder: (context, animation, _, child) =>
+              SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+                child: child,
+              ),
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ),
+
+      // ── Boss Battle (outside shell) ────────────────────────────────────────────
+      GoRoute(
+        path: '/levels/:levelId/boss',
+        pageBuilder: (context, state) {
+          final levelId = int.parse(state.pathParameters['levelId']!);
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: BossScreen(levelId: levelId),
+            transitionsBuilder: (context, animation, _, child) => SlideTransition(
+              position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+                  .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+              child: child,
+            ),
+            transitionDuration: const Duration(milliseconds: 300),
+          );
+        },
+      ),
+
+      // ── Boss Defeated (outside shell) ──────────────────────────────────────────
+      GoRoute(
+        path: '/levels/:levelId/boss/defeat',
+        pageBuilder: (context, state) {
+          final levelId = int.parse(state.pathParameters['levelId']!);
+          final extra   = state.extra as Map<String, dynamic>?;
+          final isReplay = extra?['isReplay'] as bool? ?? false;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: BossDefeatedScreen(levelId: levelId, isReplay: isReplay),
+            transitionsBuilder: (context, animation, _, child) => FadeTransition(opacity: animation, child: child),
+            transitionDuration: const Duration(milliseconds: 400),
+          );
+        },
+      ),
+
+      // ── Co-op Mode (outside shell) ─────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.coop,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const CoopScreen(),
+          transitionsBuilder: (context, animation, _, child) => SlideTransition(
+            position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+                .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+            child: child,
+          ),
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ),
+
+      // ── Seasons (outside shell) ────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.seasons,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SeasonScreen(),
+          transitionsBuilder: (context, animation, _, child) => SlideTransition(
+            position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+                .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+            child: child,
+          ),
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ),
+
+      // ── Family (outside shell) ─────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.family,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const FamilyScreen(),
+        ),
+      ),
+
+      // ── Business (outside shell) ───────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.business,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const BusinessScreen(),
+        ),
+      ),
+
+      // ── Life Event (full-screen overlay, outside shell) ────────────────────────
+      GoRoute(
+        path: AppRoutes.lifeEvent,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const LifeEventScreen(),
+          transitionsBuilder: (context, animation, _, child) => FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeIn),
+            child: child,
+          ),
+          transitionDuration: const Duration(milliseconds: 350),
+        ),
+      ),
+
+      // ── Property Ladder (outside shell) ────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.property,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const PropertyScreen(),
+        ),
+      ),
+
+      // ── Investment Portfolio (outside shell) ────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.portfolio,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const PortfolioScreen(),
+        ),
+      ),
+
+      // ── Loans & Debt (outside shell) ────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.loans,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const LoansScreen(),
+        ),
+      ),
+
+      // ── Savings Goals (outside shell) ───────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.savings,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const SavingsScreen(),
+        ),
+      ),
+
+      // ── Net Worth Dashboard (outside shell) ─────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.netWorth,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const NetWorthScreen(),
+        ),
+      ),
+
+      // ── Financial News Feed (outside shell) ─────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.news,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const NewsScreen(),
+        ),
+      ),
+
+      // ── Financial Health Score (outside shell) ───────────────────────────────────
+      GoRoute(
+        path: AppRoutes.health,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const HealthScreen(),
+        ),
+      ),
+
+      // ── Myth Busting (outside shell) ──────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.myths,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const MythScreen(),
+        ),
+      ),
+
+      // ── Entrepreneur Spotlights (outside shell) ───────────────────────────────
+      GoRoute(
+        path: AppRoutes.spotlights,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const SpotlightsScreen(),
+        ),
+      ),
+
+      // ── Spotlight Story (outside shell) ───────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.spotlightStory,
+        pageBuilder: (context, state) {
+          final extra    = state.extra as Map<String, dynamic>;
+          final storyId  = extra['storyId'] as int;
+          final storyIdx = extra['storyIdx'] as int;
+          return _fadeSlidePage(
+            pageKey: state.pageKey,
+            child: SpotlightStoryScreen(storyId: storyId, storyIdx: storyIdx),
+          );
+        },
+      ),
+
+      // ── Mentors (outside shell) ────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.mentors,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const MentorsScreen(),
+        ),
+      ),
+
+      // ── Proverbs / Wisdom Book (outside shell) ─────────────────────────────────
+      GoRoute(
+        path: AppRoutes.proverbs,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const ProverbsScreen(),
+        ),
+      ),
+
+      // ── Daily Routine (outside shell) ──────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.dailyRoutine,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const DailyRoutineScreen(),
+        ),
+      ),
+
+      // ── Change Avatar (outside shell) ───────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.changeAvatar,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const ChangeAvatarScreen(),
+        ),
+      ),
+
+      // ── Recovery Plan (outside shell) ───────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.recoveryPlan,
+        pageBuilder: (context, state) => _fadeSlidePage(
+          pageKey: state.pageKey,
+          child: const RecoveryPlanScreen(),
+        ),
+      ),
+
+      // ── Tutorial (full screen, outside shell) ────────────────────────────────
+      GoRoute(
+        path: AppRoutes.tutorial,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: TutorialScreen(),
+        ),
+      ),
+
       // ── Shell — Bottom Navigation Scaffold ─────────────────────────────────
       ShellRoute(
         builder: (context, state, child) {
@@ -370,12 +831,10 @@ class _MainScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        child: KeyedSubtree(key: ValueKey(location), child: child),
-      ),
+      // No AnimatedSwitcher here — each tab route already supplies its own
+      // CustomTransitionPage fade/slide via _fadeSlidePage. Stacking
+      // AnimatedSwitcher on top caused a noticeable 200ms double-animate.
+      body: child,
       bottomNavigationBar: _NavBar(
         currentIndex: _currentIndex,
         onTap: (i) => _onTap(context, i),

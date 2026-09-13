@@ -300,6 +300,251 @@ const int kMaxStreakShields = 3;
 const String kStoryBox = 'story';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Gamification — New Hive Box Names (Wave 0)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const String kHeartsBox = 'hearts';
+const String kInventoryBox = 'inventory';
+const String kBossBox = 'boss_records';
+const String kStreakBox = 'streak';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// My Life Features — Hive Box Names
+// ─────────────────────────────────────────────────────────────────────────────
+
+const String kFamilyBox = 'family';
+const String kBusinessBox = 'business';
+const String kLifeEventsBox = 'life_events';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// My Finances Features — Hive Box Names
+// ─────────────────────────────────────────────────────────────────────────────
+
+const String kPropertyBox = 'property';
+const String kInvestmentsBox = 'investments';
+const String kLoansBox = 'loans';
+const String kSavingsGoalsBox = 'savings_goals';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Property Feature Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Monthly property value appreciation rate (3% per month, educational display).
+const double kPropertyMonthlyAppreciation = 0.03;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Portfolio Feature Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Max snapshots kept for the portfolio line chart.
+const int kPortfolioMaxSnapshots = 30;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Loans Feature Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Starting credit score for new players.
+const int kCreditScoreDefault = 650;
+
+/// Credit score threshold required to take a business loan.
+const int kBusinessLoanMinCreditScore = 700;
+
+/// Credit score penalty for an overdue loan payment.
+const int kOverdueCreditPenalty = 50;
+
+/// Credit score reward for an on-time loan payment.
+const int kOnTimeCreditReward = 5;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Savings Feature Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Maximum number of savings goals a player can have simultaneously.
+const int kMaxSavingsGoals = 5;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Analytics & Visualization Features — Hive Box Names
+// ─────────────────────────────────────────────────────────────────────────────
+
+const String kNewsBox   = 'news';
+const String kHealthBox = 'health';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Net Worth Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// 1 ZamCoin = ZMW 10 (educational exchange rate for net worth display).
+const int kZamCoinToZMW = 10;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// News Feature Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Number of headlines shown per rotation cycle.
+const int kNewsDisplayCount = 5;
+
+/// Days between headline rotations.
+const int kNewsRotationDays = 7;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Health Score Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const int kHealthSubScoreMax = 20; // max per sub-score
+const int kHealthHistoryMax  = 12; // weeks of history kept
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Educational Content Features — Hive Box Names
+// ─────────────────────────────────────────────────────────────────────────────
+
+const String kMythsBox        = 'myths';
+const String kSpotlightsBox   = 'spotlights';
+const String kMentorsBox      = 'mentors';
+const String kProverbsBox     = 'proverbs';
+const String kDailyRoutineBox = 'daily_routine';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Myth-Busting Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Myth cards surfaced per day.
+const int kMythsPerDay = 3;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mentor Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Financial Health Score threshold required to unlock Mentor 5 (Mwansa).
+const int kMentorHealthScoreUnlock = 70;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Proverb Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Total proverbs in the collection; completing all unlocks "Elder of Wisdom".
+const int kTotalProverbs = 25;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Daily Routine Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const int kMorningTipXp          = 10;
+const int kMiddayQuizXp           = 25;
+const int kEveningReflectionXp    = 15;
+const int kPerfectDayXp           = 50;
+const int kPerfectDayCoins        = 15;
+const int kPerfectWeekCoins       = 100;
+const int kPerfectWeekStreak      = 7;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Family Feature Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// School fees cost in ZMW per term.
+const int kFamilySchoolFees = 450;
+
+/// Happiness boost (points) from paying school fees.
+const int kFamilySchoolFeesHappinessBoost = 8;
+
+/// ZamCoins cost to trigger a family happiness boost outing.
+const int kFamilyHappinessBoostCost = 20;
+
+/// Happiness gained from a family outing.
+const int kFamilyHappinessBoostAmount = 15;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Business Feature Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Days between available weekly business decisions.
+const int kBusinessDecisionIntervalDays = 7;
+
+/// Compliance score fully registered (PACRA + ZRA + NAPSA).
+const int kBusinessMaxCompliance = 100;
+
+/// ZamCoins earned when business reaches stage 3+.
+const int kBusinessStageUpReward = 30;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Life Events Feature Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Probability (0.0–1.0) that a life event triggers on any given day.
+const double kLifeEventTriggerChance = 0.70;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hearts Config
+// ─────────────────────────────────────────────────────────────────────────────
+
+const int kMaxHearts = 5;
+const int kHeartRefillMinutes = 30;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Power-up IDs
+// ─────────────────────────────────────────────────────────────────────────────
+
+const String kPowerUpHintToken = 'hint_token';
+const String kPowerUpShield = 'shield';
+const String kPowerUpFreeze = 'freeze';
+const String kPowerUpXpMultiplier = 'xp_multiplier';
+const String kPowerUpDoubleXp = 'double_xp';
+const String kPowerUpMysteryBox = 'mystery_box';
+
+const Map<String, int> kDefaultPowerUps = {
+  kPowerUpHintToken: 0,
+  kPowerUpShield: 0,
+  kPowerUpFreeze: 0,
+  kPowerUpXpMultiplier: 0,
+  kPowerUpDoubleXp: 0,
+  kPowerUpMysteryBox: 0,
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Avatar IDs
+// ─────────────────────────────────────────────────────────────────────────────
+
+const String kAvatarStudent = 'student';
+const String kAvatarTrader = 'trader';
+const String kAvatarFarmer = 'farmer';
+const String kAvatarEntrepreneur = 'entrepreneur';
+const String kAvatarCivilServant = 'civil_servant';
+const String kAvatarInnovator = 'innovator';
+
+const List<String> kAvatarIds = [
+  kAvatarStudent,
+  kAvatarTrader,
+  kAvatarFarmer,
+  kAvatarEntrepreneur,
+  kAvatarCivilServant,
+  kAvatarInnovator,
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Daily Bonus Schedule (day 1–7)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// powerUp: null = none, otherwise a kPowerUp* constant
+const List<Map<String, dynamic>> kDailyBonusSchedule = [
+  {'coins': 10, 'xp': 0, 'powerUp': null},
+  {'coins': 15, 'xp': 50, 'powerUp': null},
+  {'coins': 20, 'xp': 0, 'powerUp': kPowerUpHintToken},
+  {'coins': 25, 'xp': 100, 'powerUp': null},
+  {'coins': 30, 'xp': 0, 'powerUp': kPowerUpShield},
+  {'coins': 40, 'xp': 150, 'powerUp': null},
+  {'coins': 60, 'xp': 0, 'powerUp': kPowerUpDoubleXp},
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wallet Earn Amounts (ZMW coins per sim level)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const int kWalletEarnLevel1 = 5;
+const int kWalletEarnLevel2 = 10;
+const int kWalletEarnLevel3 = 15;
+const int kWalletEarnLevel4 = 20;
+const int kWalletEarnBossDefeat = 100;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Quiz System — Category Constants
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1651,3 +1896,195 @@ const List<SeasonalEvent> kSeasonalEvents = [
     zamCoinBonus: 60,
   ),
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Spin Wheel Segments  (Wave 2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Wheel segments — 8 entries in display order (index 0 = top after spin)
+const List<Map<String, dynamic>> kWheelSegments = [
+  {'label': 'ZMW 10', 'type': 'coins', 'value': 10},
+  {'label': 'ZMW 25', 'type': 'coins', 'value': 25},
+  {'label': '50 XP', 'type': 'xp', 'value': 50},
+  {'label': '100 XP', 'type': 'xp', 'value': 100},
+  {'label': 'Hint Token', 'type': 'powerup', 'value': kPowerUpHintToken},
+  {'label': 'Shield', 'type': 'powerup', 'value': kPowerUpShield},
+  {'label': 'Double XP', 'type': 'powerup', 'value': kPowerUpDoubleXp},
+  {'label': '+1 Shield', 'type': 'streak_shield', 'value': 1},
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shop Catalogue  (Wave 2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Shop item catalogue
+class ShopItem {
+  final String id;
+  final String name;
+  final String description;
+  final int price; // ZMW coins
+  final String emoji;
+  final bool isPowerUp; // false = cosmetic
+
+  const ShopItem({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.emoji,
+    required this.isPowerUp,
+  });
+}
+
+const List<ShopItem> kShopPowerUps = [
+  ShopItem(id: kPowerUpHintToken, name: 'Hint Token', description: 'Reveals one correct answer', price: 15, emoji: '💡', isPowerUp: true),
+  ShopItem(id: kPowerUpShield, name: 'Shield', description: 'Protects hearts for one session', price: 25, emoji: '🛡', isPowerUp: true),
+  ShopItem(id: kPowerUpFreeze, name: 'Freeze', description: 'Pauses timer for 10 seconds', price: 20, emoji: '❄️', isPowerUp: true),
+  ShopItem(id: kPowerUpXpMultiplier, name: 'XP Multiplier 1.5x', description: 'Next simulation gives 1.5x XP', price: 30, emoji: '⚡', isPowerUp: true),
+  ShopItem(id: kPowerUpDoubleXp, name: 'Double XP', description: 'Next simulation gives 2x XP', price: 40, emoji: '🔥', isPowerUp: true),
+];
+
+const List<ShopItem> kShopCosmetics = [
+  ShopItem(id: 'gold_frame', name: 'Gold Frame', description: 'Gold profile badge frame', price: 60, emoji: '🥇', isPowerUp: false),
+  ShopItem(id: 'copper_frame', name: 'Copper Frame', description: 'Copper profile badge frame', price: 60, emoji: '🥉', isPowerUp: false),
+  ShopItem(id: 'emerald_frame', name: 'Emerald Frame', description: 'Emerald profile badge frame', price: 60, emoji: '💚', isPowerUp: false),
+  ShopItem(id: 'flame_blue', name: 'Blue Flame', description: 'Blue flame streak icon', price: 35, emoji: '🔵', isPowerUp: false),
+  ShopItem(id: 'flame_purple', name: 'Purple Flame', description: 'Purple flame streak icon', price: 35, emoji: '🟣', isPowerUp: false),
+  ShopItem(id: 'flame_rainbow', name: 'Rainbow Flame', description: 'Rainbow flame streak icon', price: 35, emoji: '🌈', isPowerUp: false),
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mystery Box Loot Table  (Wave 4)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Mystery box loot tiers
+const kMysteryLootCommon = 'common';
+const kMysteryLootRare   = 'rare';
+const kMysteryLootEpic   = 'epic';
+
+// Weighted loot table: list of (tier, weight) pairs summing to 100
+const kMysteryLootWeights = [
+  (kMysteryLootCommon, 60),
+  (kMysteryLootRare,   30),
+  (kMysteryLootEpic,   10),
+];
+
+// Common rewards
+const kMysteryCommonRewards = ['coins_10', 'coins_20', 'coins_30', 'xp_50'];
+// Rare rewards
+const kMysteryRareRewards = ['hint_token', 'shield', 'freeze'];
+// Epic rewards
+const kMysteryEpicRewards = ['double_xp', 'xp_multiplier', 'cosmetic_gold_frame'];
+
+// Story path badge IDs
+const kBadgeStorySaver        = 'story_saver';
+const kBadgeStoryInvestor     = 'story_investor';
+const kBadgeStoryEntrepreneur = 'story_entrepreneur';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Boss level constants  (Wave 5)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const int kBossMaxHp = 10;
+const int kBossQuestionCount = 10;
+
+class BossConfig {
+  final int levelId;
+  final String name;
+  final String description;
+  final String badgeId;
+  final int xpReward;
+  final int coinsReward;
+
+  const BossConfig({
+    required this.levelId,
+    required this.name,
+    required this.description,
+    required this.badgeId,
+    required this.xpReward,
+    required this.coinsReward,
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Badge IDs — boss  (Wave 5)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const kBadgeBoss1 = 'boss_1_defeated';
+const kBadgeBoss2 = 'boss_2_defeated';
+const kBadgeBoss3 = 'boss_3_defeated';
+const kBadgeBoss4 = 'boss_4_defeated';
+
+const kBossConfigs = [
+  BossConfig(
+    levelId: 1,
+    name: 'Chipata the Debt Collector',
+    description: 'Grey suit, stern expression. Demands payment.',
+    badgeId: kBadgeBoss1,
+    xpReward: 500,
+    coinsReward: 100,
+  ),
+  BossConfig(
+    levelId: 2,
+    name: 'Mulenga the Loan Shark',
+    description: 'Sharp suit, coin bag prop. Offers dangerous deals.',
+    badgeId: kBadgeBoss2,
+    xpReward: 600,
+    coinsReward: 100,
+  ),
+  BossConfig(
+    levelId: 3,
+    name: 'Kabwe the Gambler',
+    description: 'Flashy jacket, dice prop. Tests your risk tolerance.',
+    badgeId: kBadgeBoss3,
+    xpReward: 800,
+    coinsReward: 100,
+  ),
+  BossConfig(
+    levelId: 4,
+    name: 'Mutale the Tax Evader',
+    description: 'Briefcase overflowing with papers. Hides the truth.',
+    badgeId: kBadgeBoss4,
+    xpReward: 1000,
+    coinsReward: 100,
+  ),
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Season constants  (Wave 5)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const kSeasonThemes = [
+  'Savings Season',
+  'Investment Season',
+  'Budget Season',
+  'Entrepreneur Season',
+  'Tax Season',
+  'Insurance Season',
+  'Retirement Season',
+  'Credit Season',
+];
+
+const kSeasonEmojis = ['💰', '📈', '📊', '🏢', '🧾', '🛡', '🏖', '💳'];
+
+// Zambian holiday dates — (month, day) → name
+const kZambiaHolidays = <(int, int), String>{
+  (10, 24): 'Zambia Independence Day',
+  (8, 12): 'Youth Day',
+  (5, 1): 'Labour Day',
+  (1, 1): 'New Year',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Badge IDs — season  (Wave 5)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const kBadgeSeasonGold   = 'season_gold';
+const kBadgeSeasonSilver = 'season_silver';
+const kBadgeSeasonBronze = 'season_bronze';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Badge ID — co-op  (Wave 5)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const kBadgeCoopTeacher = 'coop_teacher';

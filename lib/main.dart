@@ -19,6 +19,23 @@ import 'package:zamwealth_quest/features/daily_challenge/models/daily_challenge_
 import 'package:zamwealth_quest/features/levels/models/level_model.dart';
 import 'package:zamwealth_quest/features/payments/models/payment_record.dart';
 import 'package:zamwealth_quest/features/story/models/story_chapter_progress.dart';
+import 'package:zamwealth_quest/features/hearts/models/hearts_model.dart';
+import 'package:zamwealth_quest/features/shop/models/inventory_model.dart';
+import 'package:zamwealth_quest/features/boss/models/boss_record.dart';
+import 'package:zamwealth_quest/features/family/models/family_model.dart';
+import 'package:zamwealth_quest/features/business/models/business_model.dart';
+import 'package:zamwealth_quest/features/life_events/models/life_event_record.dart';
+import 'package:zamwealth_quest/features/property/models/property_model.dart';
+import 'package:zamwealth_quest/features/portfolio/models/portfolio_model.dart';
+import 'package:zamwealth_quest/features/loans/models/loan_record.dart';
+import 'package:zamwealth_quest/features/savings/models/savings_record.dart';
+import 'package:zamwealth_quest/features/news/models/news_record.dart';
+import 'package:zamwealth_quest/features/health/models/health_record.dart';
+import 'package:zamwealth_quest/features/myths/models/myth_record.dart';
+import 'package:zamwealth_quest/features/spotlights/models/spotlight_record.dart';
+import 'package:zamwealth_quest/features/mentors/models/mentor_record.dart';
+import 'package:zamwealth_quest/features/proverbs/models/proverb_record.dart';
+import 'package:zamwealth_quest/features/daily_routine/models/daily_routine_record.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +49,24 @@ Future<void> main() async {
   Hive.registerAdapter(LevelModelAdapter()); // typeId 1
   Hive.registerAdapter(PaymentRecordAdapter()); // typeId 2
   Hive.registerAdapter(DailyChallengeRecordAdapter()); // typeId 3
+  Hive.registerAdapter(FamilyModelAdapter());          // typeId 4
+  Hive.registerAdapter(BusinessModelAdapter());        // typeId 5
+  Hive.registerAdapter(LifeEventRecordAdapter());      // typeId 6
   Hive.registerAdapter(StoryChapterProgressAdapter()); // typeId 12
+  Hive.registerAdapter(HeartsModelAdapter());          // typeId 10
+  Hive.registerAdapter(InventoryModelAdapter());       // typeId 11
+  Hive.registerAdapter(BossRecordAdapter());           // typeId 13
+  Hive.registerAdapter(PropertyModelAdapter());        // typeId 7
+  Hive.registerAdapter(PortfolioModelAdapter());       // typeId 8
+  Hive.registerAdapter(LoanRecordAdapter());           // typeId 14
+  Hive.registerAdapter(SavingsRecordAdapter());        // typeId 15
+  Hive.registerAdapter(NewsRecordAdapter());           // typeId 16
+  Hive.registerAdapter(HealthRecordAdapter());         // typeId 17
+  Hive.registerAdapter(MythRecordAdapter());           // typeId 18
+  Hive.registerAdapter(SpotlightRecordAdapter());      // typeId 19
+  Hive.registerAdapter(MentorRecordAdapter());         // typeId 20
+  Hive.registerAdapter(ProverbRecordAdapter());        // typeId 21
+  Hive.registerAdapter(DailyRoutineRecordAdapter());   // typeId 22
 
   // ── 3. Open all Hive boxes ───────────────────────────────────────────────
   await Future.wait([
@@ -43,7 +77,25 @@ Future<void> main() async {
     Hive.openBox(kLeaderboardBox),
     Hive.openBox(kSettingsBox),
     Hive.openBox<DailyChallengeRecord>(kDailyChallengeBox),
+    Hive.openBox<FamilyModel>(kFamilyBox),
+    Hive.openBox<BusinessModel>(kBusinessBox),
+    Hive.openBox<LifeEventRecord>(kLifeEventsBox),
     Hive.openBox<StoryChapterProgress>(kStoryBox),
+    Hive.openBox<HeartsModel>(kHeartsBox),
+    Hive.openBox<InventoryModel>(kInventoryBox),
+    Hive.openBox<BossRecord>(kBossBox),
+    Hive.openBox<PropertyModel>(kPropertyBox),
+    Hive.openBox<PortfolioModel>(kInvestmentsBox),
+    Hive.openBox<LoanRecord>(kLoansBox),
+    Hive.openBox<SavingsRecord>(kSavingsGoalsBox),
+    Hive.openBox<NewsRecord>(kNewsBox),
+    Hive.openBox<HealthRecord>(kHealthBox),
+    Hive.openBox<MythRecord>(kMythsBox),
+    Hive.openBox<SpotlightRecord>(kSpotlightsBox),
+    Hive.openBox<MentorRecord>(kMentorsBox),
+    Hive.openBox<ProverbRecord>(kProverbsBox),
+    Hive.openBox<DailyRoutineRecord>(kDailyRoutineBox),
+    Hive.openBox(kStreakBox),
   ]);
 
   // ── 4. Seed one-time initial data ────────────────────────────────────────
@@ -127,6 +179,9 @@ class ZamWealthApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: zamWealthTheme,
       routerConfig: router,
+      builder: (context, child) {
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }
