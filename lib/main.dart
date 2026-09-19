@@ -1,18 +1,23 @@
 /// main.dart
 /// Purpose: App entry point — initialises Hive, registers all TypeAdapters,
-///          opens all required boxes, seeds initial data, then launches the
+///          opens all boxes **encrypted**, migrates legacy plaintext data and
+///          legacy password hashes, seeds initial data, then launches the
 ///          Flutter widget tree wrapped in ProviderScope.
-/// Reads from: Hive boxes (all, on initialisation)
-/// Writes to: Hive boxes 'leaderboard', 'settings' (initial seed data)
+/// Reads from: Hive boxes (all, on initialisation), platform secure storage
+/// Writes to: Hive boxes 'leaderboard', 'settings' (initial seed data),
+///            'users' (one-time password hash upgrade), 'zw_migration'
 /// Navigation: delegates entirely to GoRouter (router.dart)
 library;
 
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:zamwealth_quest/core/constants.dart';
+import 'package:zamwealth_quest/core/password_hasher.dart';
 import 'package:zamwealth_quest/core/router.dart';
+import 'package:zamwealth_quest/core/secure_hive.dart';
 import 'package:zamwealth_quest/core/theme.dart';
 import 'package:zamwealth_quest/features/auth/models/user_profile.dart';
 import 'package:zamwealth_quest/features/daily_challenge/models/daily_challenge_record.dart';
@@ -40,8 +45,13 @@ import 'package:zamwealth_quest/features/daily_routine/models/daily_routine_reco
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ── 1. Initialise Hive ──────────────────────────────────────────────────
+  // ── 1. Initialise Hive + load the encryption key ────────────────────────
+  // The migration bookkeeping box is plaintext and must be open first: it
+  // records both the per-box migration flags and, if the keystore entry has
+  // been lost, the fact that encrypted data could not be recovered.
   await Hive.initFlutter();
+  await openMigrationBox();
+  final cipher = await getHiveCipher();
 
   // ── 2. Register TypeAdapters ─────────────────────────────────────────────
   // Order matters — register before opening boxes.
@@ -49,56 +59,63 @@ Future<void> main() async {
   Hive.registerAdapter(LevelModelAdapter()); // typeId 1
   Hive.registerAdapter(PaymentRecordAdapter()); // typeId 2
   Hive.registerAdapter(DailyChallengeRecordAdapter()); // typeId 3
-  Hive.registerAdapter(FamilyModelAdapter());          // typeId 4
-  Hive.registerAdapter(BusinessModelAdapter());        // typeId 5
-  Hive.registerAdapter(LifeEventRecordAdapter());      // typeId 6
+  Hive.registerAdapter(FamilyModelAdapter()); // typeId 4
+  Hive.registerAdapter(BusinessModelAdapter()); // typeId 5
+  Hive.registerAdapter(LifeEventRecordAdapter()); // typeId 6
   Hive.registerAdapter(StoryChapterProgressAdapter()); // typeId 12
-  Hive.registerAdapter(HeartsModelAdapter());          // typeId 10
-  Hive.registerAdapter(InventoryModelAdapter());       // typeId 11
-  Hive.registerAdapter(BossRecordAdapter());           // typeId 13
-  Hive.registerAdapter(PropertyModelAdapter());        // typeId 7
-  Hive.registerAdapter(PortfolioModelAdapter());       // typeId 8
-  Hive.registerAdapter(LoanRecordAdapter());           // typeId 14
-  Hive.registerAdapter(SavingsRecordAdapter());        // typeId 15
-  Hive.registerAdapter(NewsRecordAdapter());           // typeId 16
-  Hive.registerAdapter(HealthRecordAdapter());         // typeId 17
-  Hive.registerAdapter(MythRecordAdapter());           // typeId 18
-  Hive.registerAdapter(SpotlightRecordAdapter());      // typeId 19
-  Hive.registerAdapter(MentorRecordAdapter());         // typeId 20
-  Hive.registerAdapter(ProverbRecordAdapter());        // typeId 21
-  Hive.registerAdapter(DailyRoutineRecordAdapter());   // typeId 22
+  Hive.registerAdapter(HeartsModelAdapter()); // typeId 10
+  Hive.registerAdapter(InventoryModelAdapter()); // typeId 11
+  Hive.registerAdapter(BossRecordAdapter()); // typeId 13
+  Hive.registerAdapter(PropertyModelAdapter()); // typeId 7
+  Hive.registerAdapter(PortfolioModelAdapter()); // typeId 8
+  Hive.registerAdapter(LoanRecordAdapter()); // typeId 14
+  Hive.registerAdapter(SavingsRecordAdapter()); // typeId 15
+  Hive.registerAdapter(NewsRecordAdapter()); // typeId 16
+  Hive.registerAdapter(HealthRecordAdapter()); // typeId 17
+  Hive.registerAdapter(MythRecordAdapter()); // typeId 18
+  Hive.registerAdapter(SpotlightRecordAdapter()); // typeId 19
+  Hive.registerAdapter(MentorRecordAdapter()); // typeId 20
+  Hive.registerAdapter(ProverbRecordAdapter()); // typeId 21
+  Hive.registerAdapter(DailyRoutineRecordAdapter()); // typeId 22
 
-  // ── 3. Open all Hive boxes ───────────────────────────────────────────────
+  // ── 3. Open all Hive boxes, encrypted ────────────────────────────────────
+  // SECURITY (audit issue 1): every box is AES-256 encrypted with a key held
+  // in the platform keystore. openSecureBox also performs the one-time
+  // migration of an existing install's plaintext boxes — see
+  // lib/core/secure_hive.dart.
   await Future.wait([
-    Hive.openBox<UserProfile>(kUserBox),
-    Hive.openBox<LevelModel>(kLevelBox),
-    Hive.openBox<PaymentRecord>(kPaymentBox),
-    Hive.openBox(kSessionBox),
-    Hive.openBox(kLeaderboardBox),
-    Hive.openBox(kSettingsBox),
-    Hive.openBox<DailyChallengeRecord>(kDailyChallengeBox),
-    Hive.openBox<FamilyModel>(kFamilyBox),
-    Hive.openBox<BusinessModel>(kBusinessBox),
-    Hive.openBox<LifeEventRecord>(kLifeEventsBox),
-    Hive.openBox<StoryChapterProgress>(kStoryBox),
-    Hive.openBox<HeartsModel>(kHeartsBox),
-    Hive.openBox<InventoryModel>(kInventoryBox),
-    Hive.openBox<BossRecord>(kBossBox),
-    Hive.openBox<PropertyModel>(kPropertyBox),
-    Hive.openBox<PortfolioModel>(kInvestmentsBox),
-    Hive.openBox<LoanRecord>(kLoansBox),
-    Hive.openBox<SavingsRecord>(kSavingsGoalsBox),
-    Hive.openBox<NewsRecord>(kNewsBox),
-    Hive.openBox<HealthRecord>(kHealthBox),
-    Hive.openBox<MythRecord>(kMythsBox),
-    Hive.openBox<SpotlightRecord>(kSpotlightsBox),
-    Hive.openBox<MentorRecord>(kMentorsBox),
-    Hive.openBox<ProverbRecord>(kProverbsBox),
-    Hive.openBox<DailyRoutineRecord>(kDailyRoutineBox),
-    Hive.openBox(kStreakBox),
+    openSecureBox<UserProfile>(kUserBox, cipher),
+    openSecureBox<LevelModel>(kLevelBox, cipher),
+    openSecureBox<PaymentRecord>(kPaymentBox, cipher),
+    openSecureBox<dynamic>(kSessionBox, cipher),
+    openSecureBox<dynamic>(kLeaderboardBox, cipher),
+    openSecureBox<dynamic>(kSettingsBox, cipher),
+    openSecureBox<DailyChallengeRecord>(kDailyChallengeBox, cipher),
+    openSecureBox<FamilyModel>(kFamilyBox, cipher),
+    openSecureBox<BusinessModel>(kBusinessBox, cipher),
+    openSecureBox<LifeEventRecord>(kLifeEventsBox, cipher),
+    openSecureBox<StoryChapterProgress>(kStoryBox, cipher),
+    openSecureBox<HeartsModel>(kHeartsBox, cipher),
+    openSecureBox<InventoryModel>(kInventoryBox, cipher),
+    openSecureBox<BossRecord>(kBossBox, cipher),
+    openSecureBox<PropertyModel>(kPropertyBox, cipher),
+    openSecureBox<PortfolioModel>(kInvestmentsBox, cipher),
+    openSecureBox<LoanRecord>(kLoansBox, cipher),
+    openSecureBox<SavingsRecord>(kSavingsGoalsBox, cipher),
+    openSecureBox<NewsRecord>(kNewsBox, cipher),
+    openSecureBox<HealthRecord>(kHealthBox, cipher),
+    openSecureBox<MythRecord>(kMythsBox, cipher),
+    openSecureBox<SpotlightRecord>(kSpotlightsBox, cipher),
+    openSecureBox<MentorRecord>(kMentorsBox, cipher),
+    openSecureBox<ProverbRecord>(kProverbsBox, cipher),
+    openSecureBox<DailyRoutineRecord>(kDailyRoutineBox, cipher),
+    openSecureBox<dynamic>(kStreakBox, cipher),
   ]);
 
-  // ── 4. Seed one-time initial data ────────────────────────────────────────
+  // ── 4. Upgrade any legacy password hashes ────────────────────────────────
+  await _migratePasswordHashes();
+
+  // ── 5. Seed one-time initial data ────────────────────────────────────────
   await _seedLeaderboard();
 
   // ── 5. Launch app ────────────────────────────────────────────────────────
@@ -108,6 +125,38 @@ Future<void> main() async {
       child: ZamWealthApp(),
     ),
   );
+}
+
+/// Re-hashes any password still stored under the old reversible base64 scheme.
+///
+/// SECURITY (audit issue 2): the previous `_hashPassword` base64-encoded a
+/// static-salted password, which is trivially reversible. Because it *is*
+/// reversible, the original password can be recovered here and re-hashed with
+/// PBKDF2 — so existing players keep their passwords instead of being locked
+/// out, and the recoverable form disappears from disk even for accounts that
+/// are never logged into again.
+///
+/// Runs once: after the first pass every hash carries the `pbkdf2$` prefix and
+/// the loop does no work. Cost is one PBKDF2 derivation per legacy account,
+/// and a personal device holds a handful of accounts at most.
+Future<void> _migratePasswordHashes() async {
+  try {
+    final box = Hive.box<UserProfile>(kUserBox);
+    for (final key in box.keys) {
+      final user = box.get(key);
+      if (user == null) continue;
+      if (!isLegacyHash(user.passwordHash)) continue;
+
+      final upgraded = upgradeLegacyHash(user.passwordHash);
+      if (upgraded == null) continue; // undecodable — leave it for login-time
+      user.passwordHash = upgraded;
+      await user.save();
+    }
+  } catch (e) {
+    // Never block startup on this. Any account missed here is still upgraded
+    // on its next successful login (see AuthNotifier.login).
+    if (kDebugMode) debugPrint('main: password hash migration deferred: $e');
+  }
 }
 
 /// Seeds the leaderboard box with 9 fictional Zambian players on first launch.
