@@ -9,28 +9,88 @@ library;
 // ─────────────────────────────────────────────────────────────────────────────
 // Hive Box Names
 // ─────────────────────────────────────────────────────────────────────────────
+//
+// SECURITY: every box below is opened with a HiveAesCipher — see
+// lib/core/secure_hive.dart. The `_v2` suffix marks the encrypted generation of
+// each box. The unsuffixed names belong to the old plaintext boxes and live in
+// [kLegacyBoxNames] purely so existing installs can be migrated once and then
+// have their plaintext files deleted. Never open a `_v2` box without a cipher.
 
 /// Name of the Hive box that stores [UserProfile] objects, keyed by username.
-const String kUserBox = 'users';
+const String kUserBox = 'users_v2';
 
 /// Name of the Hive box that stores [LevelModel] objects,
 /// keyed by the composite string `"<uid>_<levelId>"`.
-const String kLevelBox = 'levels';
+const String kLevelBox = 'levels_v2';
 
 /// Name of the Hive box that stores [PaymentRecord] objects, keyed by paymentId.
-const String kPaymentBox = 'payments';
+const String kPaymentBox = 'payments_v2';
 
 /// Name of the Hive box that stores the current session.
 /// Key `'currentUid'` holds the username of the logged-in user (or null).
-const String kSessionBox = 'session';
+const String kSessionBox = 'session_v2';
 
 /// Name of the Hive box that stores leaderboard placeholder data.
 /// Key `'entries'` holds a `List<Map>` of fictional player entries.
-const String kLeaderboardBox = 'leaderboard';
+const String kLeaderboardBox = 'leaderboard_v2';
 
 /// Name of the Hive box that stores miscellaneous app settings.
-/// Keys: `'sandboxMode'` (bool), `'onboardingDone_<uid>'` (bool).
-const String kSettingsBox = 'settings';
+/// Keys: [kSandboxModeKey] (bool, debug/profile builds only),
+/// `'onboardingDone_<uid>'` (bool), `'tutorial_completed_<uid>'` (bool).
+const String kSettingsBox = 'settings_v2';
+
+/// Small bookkeeping box that is **deliberately left unencrypted**.
+///
+/// It holds only migration flags — no user data — and it has to stay readable
+/// without the cipher, because it records whether each encrypted box has been
+/// migrated yet. [kSettingsBox] cannot hold these flags: it is itself one of
+/// the boxes being migrated.
+const String kMigrationBox = 'zw_migration';
+
+/// Maps each encrypted box name to the plaintext box it replaced.
+///
+/// Used once per box by `openSecureBox` (lib/core/secure_hive.dart) to copy an
+/// existing install's data into the encrypted box, after which the plaintext
+/// file is deleted from disk. Fresh installs never touch these names.
+const Map<String, String> kLegacyBoxNames = {
+  kUserBox: 'users',
+  kLevelBox: 'levels',
+  kPaymentBox: 'payments',
+  kSessionBox: 'session',
+  kLeaderboardBox: 'leaderboard',
+  kSettingsBox: 'settings',
+  kDailyChallengeBox: 'daily_challenge',
+  kFamilyBox: 'family',
+  kBusinessBox: 'business',
+  kLifeEventsBox: 'life_events',
+  kStoryBox: 'story',
+  kHeartsBox: 'hearts',
+  kInventoryBox: 'inventory',
+  kBossBox: 'boss_records',
+  kPropertyBox: 'property',
+  kInvestmentsBox: 'investments',
+  kLoansBox: 'loans',
+  kSavingsGoalsBox: 'savings_goals',
+  kNewsBox: 'news',
+  kHealthBox: 'health',
+  kMythsBox: 'myths',
+  kSpotlightsBox: 'spotlights',
+  kMentorsBox: 'mentors',
+  kProverbsBox: 'proverbs',
+  kDailyRoutineBox: 'daily_routine',
+  kStreakBox: 'streak',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Settings Box Keys
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Settings key for the payment sandbox toggle.
+///
+/// Reading this key directly is not enough — always go through
+/// `isSandboxMode` in lib/core/app_flags.dart, which additionally requires a
+/// debug or profile build. A release build ignores this flag entirely.
+const String kSandboxModeKey = 'sandboxMode';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Level IDs
@@ -278,7 +338,7 @@ const List<double> kCompoundRates = [0.08, 0.15, 0.22];
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Name of the Hive box that stores [DailyChallengeRecord] objects, keyed by uid.
-const String kDailyChallengeBox = 'daily_challenge';
+const String kDailyChallengeBox = 'daily_challenge_v2';
 
 /// Key used when storing/fetching the single record per user.
 const String kDailyChallengeKey = 'record';
@@ -297,33 +357,33 @@ const int kMaxStreakShields = 3;
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Hive box for per-user per-chapter story progress (StoryChapterProgress).
-const String kStoryBox = 'story';
+const String kStoryBox = 'story_v2';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Gamification — New Hive Box Names (Wave 0)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const String kHeartsBox = 'hearts';
-const String kInventoryBox = 'inventory';
-const String kBossBox = 'boss_records';
-const String kStreakBox = 'streak';
+const String kHeartsBox = 'hearts_v2';
+const String kInventoryBox = 'inventory_v2';
+const String kBossBox = 'boss_records_v2';
+const String kStreakBox = 'streak_v2';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // My Life Features — Hive Box Names
 // ─────────────────────────────────────────────────────────────────────────────
 
-const String kFamilyBox = 'family';
-const String kBusinessBox = 'business';
-const String kLifeEventsBox = 'life_events';
+const String kFamilyBox = 'family_v2';
+const String kBusinessBox = 'business_v2';
+const String kLifeEventsBox = 'life_events_v2';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // My Finances Features — Hive Box Names
 // ─────────────────────────────────────────────────────────────────────────────
 
-const String kPropertyBox = 'property';
-const String kInvestmentsBox = 'investments';
-const String kLoansBox = 'loans';
-const String kSavingsGoalsBox = 'savings_goals';
+const String kPropertyBox = 'property_v2';
+const String kInvestmentsBox = 'investments_v2';
+const String kLoansBox = 'loans_v2';
+const String kSavingsGoalsBox = 'savings_goals_v2';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Property Feature Constants
@@ -366,8 +426,8 @@ const int kMaxSavingsGoals = 5;
 // Analytics & Visualization Features — Hive Box Names
 // ─────────────────────────────────────────────────────────────────────────────
 
-const String kNewsBox   = 'news';
-const String kHealthBox = 'health';
+const String kNewsBox   = 'news_v2';
+const String kHealthBox = 'health_v2';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Net Worth Constants
@@ -397,11 +457,11 @@ const int kHealthHistoryMax  = 12; // weeks of history kept
 // Educational Content Features — Hive Box Names
 // ─────────────────────────────────────────────────────────────────────────────
 
-const String kMythsBox        = 'myths';
-const String kSpotlightsBox   = 'spotlights';
-const String kMentorsBox      = 'mentors';
-const String kProverbsBox     = 'proverbs';
-const String kDailyRoutineBox = 'daily_routine';
+const String kMythsBox        = 'myths_v2';
+const String kSpotlightsBox   = 'spotlights_v2';
+const String kMentorsBox      = 'mentors_v2';
+const String kProverbsBox     = 'proverbs_v2';
+const String kDailyRoutineBox = 'daily_routine_v2';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Myth-Busting Constants

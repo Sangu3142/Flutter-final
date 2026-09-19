@@ -9,7 +9,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:zamwealth_quest/core/theme.dart';
+import 'package:zamwealth_quest/core/app_flags.dart';
 import 'package:zamwealth_quest/features/auth/providers/auth_provider.dart';
 import 'package:zamwealth_quest/features/auth/screens/splash_screen.dart';
 import 'package:zamwealth_quest/features/daily_challenge/screens/daily_challenge_screen.dart';
@@ -63,6 +63,7 @@ import 'package:zamwealth_quest/features/daily_routine/screens/daily_routine_scr
 import '../features/recovery/screens/recovery_plan_screen.dart';
 import '../features/avatar/screens/change_avatar_screen.dart';
 import '../features/tutorial/tutorial_screen.dart';
+import 'package:zamwealth_quest/core/theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Route Paths
@@ -335,13 +336,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ── Dev Screen (outside shell) ─────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.dev,
-        pageBuilder: (context, state) => _fadeSlidePage(
-          pageKey: state.pageKey,
-          child: const DevScreen(),
+      // SECURITY: registered only in debug/profile builds. The dev console can
+      // force-unlock paid levels, dump every Hive box, and wipe all data, so a
+      // release build must not contain a route to it at all — not even one
+      // hidden behind the 7-tap easter egg, which any user can find.
+      if (isDevSurfaceEnabled)
+        GoRoute(
+          path: AppRoutes.dev,
+          pageBuilder: (context, state) => _fadeSlidePage(
+            pageKey: state.pageKey,
+            child: const DevScreen(),
+          ),
         ),
-      ),
 
       // ── Badges Screen (outside shell) ──────────────────────────────────────
       GoRoute(
